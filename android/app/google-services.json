@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "632615523894",
+    "project_id": "bite-box-ecb04",
+    "storage_bucket": "bite-box-ecb04.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:632615523894:android:91a4fa605b783b38852a97",
+        "android_client_info": {
+          "package_name": "com.example.bite_box"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBengyZ4uapQBsSKa8XmlHeEqn9x_PuBPU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
