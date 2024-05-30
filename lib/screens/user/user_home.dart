@@ -36,11 +36,18 @@ class _User_homeState extends State<User_home> {
     super.dispose();
   }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
         actions: [
           Padding(
@@ -51,9 +58,12 @@ class _User_homeState extends State<User_home> {
                   onTap: () {
                     Scaffold.of(context).openEndDrawer();
                   },
-                  child: FaIcon(
-                    FontAwesomeIcons.bars,
-                    color: Colors.black,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Icon(
+                      Icons.menu,
+                      color: Colors.black,
+                    ),
                   ),
                 );
               },
@@ -69,8 +79,8 @@ class _User_homeState extends State<User_home> {
                   MaterialPageRoute(builder: (context) => Notifications()),
                 );
               },
-              child: FaIcon(
-                FontAwesomeIcons.solidBell,
+              child: Icon(
+                Icons.notifications_none,
                 color: Colors.black,
               ),
             ),
@@ -84,8 +94,8 @@ class _User_homeState extends State<User_home> {
                   MaterialPageRoute(builder: (context) => Cart()),
                 );
               },
-              child: const FaIcon(
-                FontAwesomeIcons.cartShopping,
+              child: const Icon(
+                Icons.shopping_cart_outlined,
                 color: Colors.black,
               ),
             ),
@@ -107,11 +117,9 @@ class _User_homeState extends State<User_home> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          _pageController.jumpToPage(index);
-        },
-        items: [
+        type: BottomNavigationBarType.fixed,
+        showUnselectedLabels: false,
+        items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
@@ -121,18 +129,21 @@ class _User_homeState extends State<User_home> {
             label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag),
+            icon: FaIcon(FontAwesomeIcons.clipboard),
             label: 'Orders',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
-            label: 'Liked',
+            label: 'Wishlist',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
           ),
         ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
       ),
       endDrawer: Drawer(),
     );
