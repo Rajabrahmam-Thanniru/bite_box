@@ -1,4 +1,4 @@
-import 'package:bite_box/screens/user_home.dart';
+import 'package:bite_box/screens/user/user_home.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -21,7 +21,9 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/User_home/',
       routes: {
-        '/User_home/': (context) => const User_home(),
+        '/User_home/': (context) => const User_home(
+              initialSelectedIndex: 0,
+            ),
       },
     );
   }
