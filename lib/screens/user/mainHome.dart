@@ -1,4 +1,6 @@
+import 'package:bite_box/utils/signOut.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class MainUserHome extends StatefulWidget {
   const MainUserHome({super.key});
@@ -14,141 +16,35 @@ class _MainUserHomeState extends State<MainUserHome> {
     return Scaffold(
         backgroundColor: Colors.white,
         body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(left: 10, top: 10, right: 10),
+            child: Column(
+          children: [
+            Align(
+              alignment: Alignment.center,
+              child: GestureDetector(
+                onTap: () {
+                  handleSignOut(context);
+                },
                 child: Container(
-                  width: width,
-                  height: width * 0.5,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Image.asset(
-                    'assets/images/mainPic.png',
-                    fit: BoxFit.fill,
-                  ),
+                  width: width * 0.98,
+                  height: 220,
+                  color: Colors.black,
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(left: 15, top: 10),
+            ),
+            const Align(
+              alignment: Alignment.centerLeft,
+              child: Padding(
+                padding: EdgeInsets.only(left: 30),
                 child: Text(
                   'Categories',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-              Container(
-                width: width,
-                height: width * 0.35,
-                //color: Colors.yellow,
-                child: Padding(
-                  padding: EdgeInsets.only(top: 20),
-                  child: Row(
-                    children: [
-                      Spacer(),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 30,
-                              backgroundColor: Colors.white,
-                              child: SizedBox(
-                                width: 60,
-                                height: 40,
-                                child: Image.asset(
-                                  'assets/images/coke.png',
-                                ),
-                              ),
-                            ),
-                            // Tab()
-                            Text(
-                              'Cool Drinks',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Spacer(),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 30,
-                              backgroundColor: Colors.white,
-                              child: Container(
-                                width: 50,
-                                height: 40,
-                                child: Image.asset(
-                                  'assets/images/briyani.png',
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Biriyani',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Spacer(),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 30,
-                              backgroundColor: Colors.white,
-                              child: Container(
-                                width: 50,
-                                height: 40,
-                                child: Image.asset(
-                                  'assets/images/noodles.png',
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Noodles',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            )
-                          ],
-                        ),
-                      ),
-                      Spacer(),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Column(
-                          children: [
-                            CircleAvatar(
-                              radius: 30,
-                              backgroundColor: Colors.white,
-                              child: Container(
-                                width: 50,
-                                height: 40,
-                                child: Image.asset(
-                                  'assets/images/fired rice.png',
-                                ),
-                              ),
-                            ),
-                            Text(
-                              'Fried Rice',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Spacer(),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ));
+            ),
+          ],
+        )));
   }
 }
