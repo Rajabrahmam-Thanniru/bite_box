@@ -1,7 +1,5 @@
 import 'package:bite_box/provider/google_sign_in.dart';
 import 'package:bite_box/screens/loginpage.dart';
-import 'package:bite_box/screens/user/user_home.dart';
-import 'package:bite_box/utils/Hexcode.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -286,16 +284,63 @@ class _SignUpState extends State<SignUp> {
                 Padding(
                   padding: const EdgeInsets.only(top: 20),
                   child: GestureDetector(
-                    onTap: () {
-                      final provider = Provider.of<GoogleSignInProvider>(
-                          context,
-                          listen: false);
-                      provider.googleLogin();
-                      String? email = FirebaseAuth.instance.currentUser?.email;
-                      if (email == "biteboxcanteen@gmail.com") {
-                        Navigator.pushNamed(context, '/AdminHome/');
-                      } else {
-                        Navigator.pushNamed(context, '/UserHome/');
+                    onTap: () async {
+                      try {
+                        // Access the GoogleSignInProvider without rebuilding the widget tree
+                        final provider = Provider.of<GoogleSignInProvider>(
+                            context,
+                            listen: false);
+
+                        // Show a loading indicator while the login process is ongoing
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) =>
+                              Center(child: CircularProgressIndicator()),
+                        );
+
+                        // Attempt to log in with Google and await completion
+                        await provider.googleLogin();
+
+                        // Remove the loading indicator once login is complete
+                        Navigator.of(context).pop();
+
+                        // Get the current user's email
+                        User? user = FirebaseAuth.instance.currentUser;
+                        String? email = user?.email;
+
+                        // Navigate based on the email
+                        if (email == "biteboxcanteen@gmail.com") {
+                          // Redirect to Admin Home
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/AdminHome/', (route) => false);
+                        } else if (email == null) {
+                          // Handle the case where email is null (user not logged in properly)
+                          print('User email is null');
+                          // Show a SnackBar with the error message
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content:
+                                    Text('Sign-In failed. Please try again.')),
+                          );
+                        } else {
+                          // Redirect to User Home
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/UserHome/', (route) => false);
+                        }
+                      } on Exception catch (e) {
+                        // Print the exception and provide user feedback
+                        print('Error during Google Sign-In: $e');
+
+                        // Remove the loading indicator in case of error
+                        Navigator.of(context).pop();
+
+                        // Show a SnackBar with the error message
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                              content:
+                                  Text('Sign-In failed. Please try again.')),
+                        );
                       }
                     },
                     child: Padding(
