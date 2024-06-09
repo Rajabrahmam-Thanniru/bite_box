@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         "/CheckUser/": (context) => const CheckUser(),
         '/LoginPage/': (context) => const LoginPage(),
         '/Signup/': (context) => const SignUp(),
-        '/AdminHome/': (context) => const AdminHome(),
+        '/AdminHome/': (context) => const AdminHome(initialSelectedIndex: 0),
         '/UserHome/': (context) => const User_home(initialSelectedIndex: 0),
       },
     );

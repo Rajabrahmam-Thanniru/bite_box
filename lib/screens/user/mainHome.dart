@@ -14,7 +14,8 @@ class MainUserHome extends StatefulWidget {
 
 class _MainUserHomeState extends State<MainUserHome> {
   List<String> featured = [];
-  List<String> featuredimages = [];
+  List<String> featuredImages = [];
+  List<int> featuredPrices = [];
 
   @override
   void initState() {
@@ -30,43 +31,48 @@ class _MainUserHomeState extends State<MainUserHome> {
 
   void _setFeaturedItems() {
     final time = TimeOfDay.now();
-    final isMorning = time.hour < 11;
+    final isMorning = time.hour < 13;
 
     final newFeatured = isMorning
-        ? ["Dosa", "Idly", "Vada", "Bonda"]
+        ? ["Masala Dosa", "Idly", "Vada", "Bonda"]
         : [
             "Chicken Biriyani",
             "Chicken Fried Rice",
             "Veg Manchuria",
             "Chicken Noodles"
           ];
-    final featuredimages2 = isMorning
-        ? [""]
+    final newFeaturedImages = isMorning
+        ? [
+            "assets/images/Dosa.png",
+            "assets/images/Idli.png",
+            "assets/images/vada.png",
+            "assets/images/bonda.png"
+          ]
         : [
             "assets/images/biriyani.png",
             "assets/images/fried rice.png",
             "assets/images/Manchuria.png",
             "assets/images/noodles.png"
           ];
+    final newFeaturedPrices = isMorning ? [40, 30, 40, 40] : [130, 90, 60, 80];
 
-    if (featured != newFeatured) {
-      setState(() {
-        featured = newFeatured;
-      });
-    }
-    if (featuredimages != featuredimages2) {
-      setState(() {
-        featuredimages = featuredimages2;
-      });
-    }
+    setState(() {
+      featured = newFeatured;
+      featuredImages = newFeaturedImages;
+      featuredPrices = newFeaturedPrices;
+    });
   }
 
   Future<Map<String, dynamic>> getCategories() async {
-    final categorySnapshot = await FirebaseFirestore.instance
-        .collection('Categories')
-        .doc('Categories Images')
-        .get();
-    return categorySnapshot.data() ?? {};
+    try {
+      final categorySnapshot = await FirebaseFirestore.instance
+          .collection('Categories')
+          .doc('Categories Images')
+          .get();
+      return categorySnapshot.data() ?? {};
+    } catch (e) {
+      return {};
+    }
   }
 
   Widget _buildCategoryItem(String category, String imageUrl) {
@@ -108,44 +114,47 @@ class _MainUserHomeState extends State<MainUserHome> {
     );
   }
 
-  Widget _buildFeaturedItem(String item, String image) {
+  Widget _buildFeaturedItem(String item, String image, int price) {
     final width = MediaQuery.of(context).size.width;
 
     return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        width: width * 0.9,
-        height: 100,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 0,
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 80,
-              height: 100,
-              margin: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.black12,
-                borderRadius: BorderRadius.circular(10),
-                image: DecorationImage(
-                  image: AssetImage(image),
-                ),
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      width: width * 0.9,
+      height: 100,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 0,
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 80,
+            height: 100,
+            margin: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.black12,
+              borderRadius: BorderRadius.circular(10),
+              image: DecorationImage(
+                image: AssetImage(image),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         item,
@@ -154,15 +163,26 @@ class _MainUserHomeState extends State<MainUserHome> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      Text(
+                        '₹ $price',
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ],
                   ),
-                  Divider(),
-                  const SizedBox(height: 10),
+                  Divider(
+                    color: Colors.black12,
+                    thickness: 0.5,
+                  ),
                 ],
               ),
-            )
-          ],
-        ));
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -178,17 +198,14 @@ class _MainUserHomeState extends State<MainUserHome> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Align(
-                alignment: Alignment.center,
-                child: GestureDetector(
-                  onTap: () {
-                    handleSignOut(context);
-                  },
-                  child: Container(
-                    width: width * 0.98,
-                    height: 220,
-                    color: Colors.black,
-                  ),
+              GestureDetector(
+                onTap: () {
+                  handleSignOut(context);
+                },
+                child: Container(
+                  width: width * 0.98,
+                  height: 220,
+                  color: Colors.black,
                 ),
               ),
               const Align(
@@ -215,7 +232,7 @@ class _MainUserHomeState extends State<MainUserHome> {
                     return Center(
                       child: Text('Error: ${snapshot.error}'),
                     );
-                  } else if (snapshot.hasData) {
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                     final categories = snapshot.data!.keys.toList();
                     final categoriesImages =
                         snapshot.data!.values.cast<String>().toList();
@@ -252,11 +269,11 @@ class _MainUserHomeState extends State<MainUserHome> {
               ),
               ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: featured.length,
                 itemBuilder: (context, index) {
-                  return _buildFeaturedItem(
-                      featured[index], featuredimages[index]);
+                  return _buildFeaturedItem(featured[index],
+                      featuredImages[index], featuredPrices[index]);
                 },
               ),
             ],

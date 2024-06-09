@@ -26,7 +26,10 @@ class _CheckUserState extends State<CheckUser> {
       if (user.email == "biteboxcanteen@gmail.com") {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => AdminHome()),
+          MaterialPageRoute(
+              builder: (context) => AdminHome(
+                    initialSelectedIndex: 0,
+                  )),
         );
       } else {
         try {
