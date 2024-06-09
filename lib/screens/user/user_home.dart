@@ -141,7 +141,7 @@ class _User_homeState extends State<User_home> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: Colors.amber[600],
         onTap: _onItemTapped,
       ),
       endDrawer: Drawer(),
