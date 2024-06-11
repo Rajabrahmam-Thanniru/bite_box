@@ -56,7 +56,7 @@ class _User_homeState extends State<User_home> {
               builder: (BuildContext context) {
                 return GestureDetector(
                   onTap: () {
-                    Scaffold.of(context).openEndDrawer();
+                    Scaffold.of(context).openDrawer();
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(left: 8.0),
@@ -182,7 +182,7 @@ class CustomDrawer extends StatelessWidget {
   // ignore: non_constant_identifier_names
   final User = FirebaseAuth.instance.currentUser;
   Future<String?> getUsername() async {
-    String? username;
+    String? email;
     try {
       var userDocument = await FirebaseFirestore.instance
           .collection('Users')
@@ -193,12 +193,12 @@ class CustomDrawer extends StatelessWidget {
 
       if (userDocument.exists) {
         // If the document exists, retrieve the username
-        username = userDocument.get('fullName');
+        email = userDocument.get('email');
       }
     } catch (e) {
       print("Error getting username: $e");
     }
-    return username;
+    return email;
   }
 
   @override
@@ -345,8 +345,12 @@ class CustomDrawer extends StatelessWidget {
                     ),
                   ),
                   onTap: () {
-                    handleNavigation(3);
-                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Cart(),
+                      ),
+                    );
                   },
                 ),
                 Divider(
