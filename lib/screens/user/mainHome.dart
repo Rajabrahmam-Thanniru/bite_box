@@ -1,4 +1,5 @@
 import 'package:bite_box/utils/Hexcode.dart';
+import 'package:bite_box/utils/Search_something.dart';
 import 'package:bite_box/utils/signOut.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,6 +14,7 @@ class MainUserHome extends StatefulWidget {
 }
 
 class _MainUserHomeState extends State<MainUserHome> {
+  SearchSomething searchSomething = SearchSomething();
   List<String> featured = [];
   List<String> featuredImages = [];
   List<int> featuredPrices = [];
@@ -242,8 +244,14 @@ class _MainUserHomeState extends State<MainUserHome> {
                         scrollDirection: Axis.horizontal,
                         itemCount: categories.length,
                         itemBuilder: (context, index) {
-                          return _buildCategoryItem(
-                              categories[index], categoriesImages[index]);
+                          return GestureDetector(
+                            onTap: () async {
+                              await searchSomething.searchSomethingFun(
+                                  context, categories[index]);
+                            },
+                            child: _buildCategoryItem(
+                                categories[index], categoriesImages[index]),
+                          );
                         },
                       ),
                     );
