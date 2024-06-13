@@ -1,5 +1,6 @@
 import 'package:bite_box/utils/Hexcode.dart';
 import 'package:bite_box/utils/Search_something.dart';
+import 'package:bite_box/utils/place_order.dart';
 import 'package:bite_box/utils/signOut.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,6 +19,8 @@ class _MainUserHomeState extends State<MainUserHome> {
   List<String> featured = [];
   List<String> featuredImages = [];
   List<int> featuredPrices = [];
+
+  Place_order po = Place_order();
 
   @override
   void initState() {
@@ -178,6 +181,29 @@ class _MainUserHomeState extends State<MainUserHome> {
                     color: Colors.black12,
                     thickness: 0.5,
                   ),
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(top: 8.0, left: 8.0, right: 20.0),
+                    child: GestureDetector(
+                      onTap: () {
+                        searchSomething.searchSomethingFun(context, item, 1);
+                      },
+                      child: Container(
+                        width: 55,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.orangeAccent),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Add +',
+                            style: TextStyle(color: Colors.orangeAccent),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -247,7 +273,7 @@ class _MainUserHomeState extends State<MainUserHome> {
                           return GestureDetector(
                             onTap: () async {
                               await searchSomething.searchSomethingFun(
-                                  context, categories[index]);
+                                  context, categories[index], 0);
                             },
                             child: _buildCategoryItem(
                                 categories[index], categoriesImages[index]),

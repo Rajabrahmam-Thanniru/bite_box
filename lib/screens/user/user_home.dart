@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:bite_box/screens/user/liked.dart';
 import 'package:bite_box/screens/user/mainHome.dart';
 import 'package:bite_box/screens/user/orders.dart';
