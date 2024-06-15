@@ -1,3 +1,6 @@
+import 'dart:ffi';
+
+import 'package:bite_box/utils/signOut.dart';
 import 'package:flutter/material.dart';
 
 class MainAdminHome extends StatefulWidget {
@@ -10,6 +13,12 @@ class MainAdminHome extends StatefulWidget {
 class _MainAdminHomeState extends State<MainAdminHome> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text("Admin Home")));
+    return Scaffold(
+        body: Center(
+            child: GestureDetector(
+                onTap: () {
+                  handleSignOut(context);
+                },
+                child: Text("Admin Home"))));
   }
 }

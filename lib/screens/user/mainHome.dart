@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:video_player/video_player.dart';
 
 class MainUserHome extends StatefulWidget {
   const MainUserHome({super.key});
@@ -20,6 +21,7 @@ class _MainUserHomeState extends State<MainUserHome> {
   List<String> featuredImages = [];
   List<int> featuredPrices = [];
   Map<int, int> tapval = {};
+  late VideoPlayerController _controller;
 
   Place_order po = Place_order();
 
@@ -27,17 +29,25 @@ class _MainUserHomeState extends State<MainUserHome> {
   void initState() {
     super.initState();
     _setFeaturedItems();
+    _controller = VideoPlayerController.asset('assets/images/banner_video.mp4')
+      ..initialize().then((_) {
+        setState(() {
+          _controller.play();
+          _controller.setLooping(true);
+        });
+      });
   }
 
   @override
   void dispose() {
     DefaultCacheManager().emptyCache();
+    _controller.dispose();
     super.dispose();
   }
 
   void _setFeaturedItems() {
     final time = TimeOfDay.now();
-    final isMorning = time.hour < 13;
+    final isMorning = time.hour < 11;
 
     final newFeatured = isMorning
         ? ["Masala Dosa", "Idly", "Vada", "Bonda"]
@@ -106,7 +116,7 @@ class _MainUserHomeState extends State<MainUserHome> {
                 key: UniqueKey(),
                 fit: BoxFit.contain,
                 placeholder: (context, url) =>
-                    const CircularProgressIndicator(),
+                    Center(child: const CircularProgressIndicator()),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             ),
@@ -185,40 +195,47 @@ class _MainUserHomeState extends State<MainUserHome> {
                     color: Colors.black12,
                     thickness: 0.5,
                   ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(top: 8.0, left: 8.0, right: 20.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          if (tapval[i] == 0) {
-                            tapval[i] = 1;
-                            searchSomething.searchSomethingFun(
-                                context, item, 1);
-                          } else {
-                            tapval[i] = 0;
-                            searchSomething.searchSomethingFun(
-                                context, item, 2);
-                          }
-                        });
-                      },
-                      child: Container(
-                        width: 55,
-                        height: 22,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.orangeAccent),
-                        ),
-                        child: Center(
-                          child: (tapval[i] == 1)
-                              ? Text(
-                                  'Added',
-                                  style: TextStyle(color: Colors.orangeAccent),
-                                )
-                              : Text(
-                                  'Add +',
-                                  style: TextStyle(color: Colors.orangeAccent),
-                                ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            if (tapval[i] == 0) {
+                              tapval[i] = 1;
+                              searchSomething.searchSomethingFun(
+                                  context, item, 1);
+                            } else {
+                              tapval[i] = 0;
+                              searchSomething.searchSomethingFun(
+                                  context, item, 2);
+                            }
+                          });
+                        },
+                        child: Container(
+                          width: (tapval[i] == 1) ? 90 : 80,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: Colors.orangeAccent),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 20, right: 20, top: 5, bottom: 5),
+                            child: Center(
+                              child: (tapval[i] == 1)
+                                  ? Text(
+                                      'Added',
+                                      style:
+                                          TextStyle(color: Colors.orangeAccent),
+                                    )
+                                  : Text(
+                                      'Add +',
+                                      style:
+                                          TextStyle(color: Colors.orangeAccent),
+                                    ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -237,7 +254,7 @@ class _MainUserHomeState extends State<MainUserHome> {
     final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 255, 254, 248),
       body: RefreshIndicator(
         onRefresh: () async {
           _setFeaturedItems();
@@ -250,9 +267,14 @@ class _MainUserHomeState extends State<MainUserHome> {
                   handleSignOut(context);
                 },
                 child: Container(
-                  width: width * 0.98,
+                  width: width,
                   height: 220,
-                  color: Colors.black,
+                  child: _controller.value.isInitialized
+                      ? AspectRatio(
+                          aspectRatio: _controller.value.aspectRatio,
+                          child: VideoPlayer(_controller),
+                        )
+                      : Center(child: CircularProgressIndicator()),
                 ),
               ),
               const Align(

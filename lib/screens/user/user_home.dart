@@ -209,6 +209,7 @@ class CustomDrawer extends StatelessWidget {
 
     return Drawer(
       width: width * 0.80,
+      backgroundColor: Colors.white,
       child: FutureBuilder<String?>(
         future: getUsername(),
         builder: (context, snapshot) {
@@ -276,7 +277,8 @@ class CustomDrawer extends StatelessWidget {
                                 '  ${snapshot.data}',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 14,
+                                  fontSize:
+                                      snapshot.data!.length <= 26 ? 14 : 11,
                                   fontFamily: 'Roboto',
                                 ),
                               ),

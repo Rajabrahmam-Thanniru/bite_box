@@ -24,6 +24,8 @@ class _UploadFoodState extends State<UploadFood> {
   TextEditingController _itemname = TextEditingController();
   TextEditingController _price = TextEditingController();
   TextEditingController _consistsof = TextEditingController();
+  TextEditingController _itemdescription = TextEditingController();
+  String dropdownValue = 'Veg';
 
   late List<String> downloadurls;
   String condition = 'Excellent';
@@ -41,6 +43,7 @@ class _UploadFoodState extends State<UploadFood> {
     _itemname.dispose();
     _price.dispose();
     _consistsof.dispose();
+    _itemdescription.dispose();
     super.dispose();
   }
 
@@ -181,6 +184,8 @@ class _UploadFoodState extends State<UploadFood> {
                   'Item Category': itemtype,
                   'Price': _price.text,
                   'Consists Of': _consistsof.text,
+                  'Item Description': _itemdescription.text,
+                  'Type': dropdownValue,
                   'Images': downloadurls,
                   'User Email': useremail,
                 }).then((value) {
@@ -585,7 +590,102 @@ class _UploadFoodState extends State<UploadFood> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
+                        "Type",
+                        style: TextStyle(
+                          fontSize: width * 0.045,
+                          fontWeight: FontWeight.w900,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: width * 0.07,
+                      top: width * 0.024,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: DropdownButton<String>(
+                        value: dropdownValue,
+                        icon: const Icon(Icons.arrow_drop_down),
+                        iconSize: 24,
+                        elevation: 16,
+                        dropdownColor: Colors.white,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            dropdownValue = newValue!;
+                          });
+                        },
+                        items: <String>['Veg', 'Non-Veg']
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: width * 0.06,
+                      top: width * 0.024,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
                         "Consists of",
+                        style: TextStyle(
+                          fontSize: width * 0.045,
+                          fontWeight: FontWeight.w900,
+                          fontFamily: 'Roboto',
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: width * 0.02,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: width * 0.04,
+                          left: width * 0.04,
+                        ),
+                        child: Container(
+                          width: width,
+                          height: 100,
+                          child: TextFormField(
+                            controller: _consistsof,
+                            decoration: InputDecoration(
+                              hintText: 'Enter What This Items Consists Of',
+                              hintStyle: TextStyle(fontSize: 14.0),
+                              contentPadding: const EdgeInsets.only(
+                                left: 5,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            maxLines: null,
+                            expands: true,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                      left: width * 0.06,
+                      top: width * 0.024,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Item Description",
                         style: TextStyle(
                           fontSize: width * 0.045,
                           fontWeight: FontWeight.w900,
@@ -609,9 +709,9 @@ class _UploadFoodState extends State<UploadFood> {
                           width: width,
                           height: 100,
                           child: TextFormField(
-                            controller: _consistsof,
+                            controller: _itemdescription,
                             decoration: InputDecoration(
-                              hintText: 'Enter What This Items Consists Of',
+                              hintText: 'Enter The Item Description',
                               hintStyle: TextStyle(fontSize: 14.0),
                               contentPadding: const EdgeInsets.only(
                                 left: 5,
