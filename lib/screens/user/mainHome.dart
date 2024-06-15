@@ -19,6 +19,7 @@ class _MainUserHomeState extends State<MainUserHome> {
   List<String> featured = [];
   List<String> featuredImages = [];
   List<int> featuredPrices = [];
+  Map<int, int> tapval = {};
 
   Place_order po = Place_order();
 
@@ -65,6 +66,10 @@ class _MainUserHomeState extends State<MainUserHome> {
       featured = newFeatured;
       featuredImages = newFeaturedImages;
       featuredPrices = newFeaturedPrices;
+      tapval.clear();
+      for (var i = 0; i < featuredImages.length; i++) {
+        tapval[i] = 0;
+      }
     });
   }
 
@@ -119,9 +124,8 @@ class _MainUserHomeState extends State<MainUserHome> {
     );
   }
 
-  Widget _buildFeaturedItem(String item, String image, int price) {
+  Widget _buildFeaturedItem(String item, String image, int price, int i) {
     final width = MediaQuery.of(context).size.width;
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       width: width * 0.9,
@@ -186,7 +190,17 @@ class _MainUserHomeState extends State<MainUserHome> {
                         const EdgeInsets.only(top: 8.0, left: 8.0, right: 20.0),
                     child: GestureDetector(
                       onTap: () {
-                        searchSomething.searchSomethingFun(context, item, 1);
+                        setState(() {
+                          if (tapval[i] == 0) {
+                            tapval[i] = 1;
+                            searchSomething.searchSomethingFun(
+                                context, item, 1);
+                          } else {
+                            tapval[i] = 0;
+                            searchSomething.searchSomethingFun(
+                                context, item, 2);
+                          }
+                        });
                       },
                       child: Container(
                         width: 55,
@@ -196,10 +210,15 @@ class _MainUserHomeState extends State<MainUserHome> {
                           border: Border.all(color: Colors.orangeAccent),
                         ),
                         child: Center(
-                          child: Text(
-                            'Add +',
-                            style: TextStyle(color: Colors.orangeAccent),
-                          ),
+                          child: (tapval[i] == 1)
+                              ? Text(
+                                  'Added',
+                                  style: TextStyle(color: Colors.orangeAccent),
+                                )
+                              : Text(
+                                  'Add +',
+                                  style: TextStyle(color: Colors.orangeAccent),
+                                ),
                         ),
                       ),
                     ),
@@ -306,8 +325,12 @@ class _MainUserHomeState extends State<MainUserHome> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: featured.length,
                 itemBuilder: (context, index) {
-                  return _buildFeaturedItem(featured[index],
-                      featuredImages[index], featuredPrices[index]);
+                  return _buildFeaturedItem(
+                    featured[index],
+                    featuredImages[index],
+                    featuredPrices[index],
+                    index,
+                  );
                 },
               ),
             ],

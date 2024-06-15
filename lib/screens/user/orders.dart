@@ -46,263 +46,260 @@ class _OrderState extends State<Order_screen> {
     final width = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 20, top: 20),
-              child: Text(
-                'Your Orders',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 25,
-                ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 20, top: 20),
+            child: Text(
+              'Your Orders',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 25,
               ),
             ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height - 100,
-              child: ListView.builder(
-                itemCount: _orderList.length,
-                itemBuilder: (context, index) {
-                  var item = _orderList[index];
-                  var orderDate = (item['orderDate'] as Timestamp).toDate();
-                  var formattedDate =
-                      DateFormat('dd-MM-yy \'at\' h:mm a').format(orderDate);
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _orderList.length,
+              itemBuilder: (context, index) {
+                var item = _orderList[index];
+                var orderDate = (item['orderDate'] as Timestamp).toDate();
+                var formattedDate =
+                    DateFormat('dd-MM-yy \'at\' h:mm a').format(orderDate);
 
-                  return Card(
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      width: width * 0.9,
-                      height: 220,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 0,
-                            blurRadius: 2,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 70,
-                                height: 70,
-                                margin: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.black12,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: item['ItemImage'] != null &&
-                                        item['ItemImage'].isNotEmpty
-                                    ? CachedNetworkImage(
-                                        imageUrl: item['ItemImage'][0],
-                                        placeholder: (context, url) => Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            Icon(Icons.error),
-                                      )
-                                    : Icon(Icons.image_not_supported),
+                return Card(
+                  child: Container(
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    width: width * 0.9,
+                    height: 220,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 0,
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 70,
+                              height: 70,
+                              margin: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.black12,
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              Spacer(),
-                              Text(
-                                item['itemName'] ?? 'No Name',
-                                style: const TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Spacer(),
-                              Column(
-                                children: [
-                                  Container(
-                                    width: 100,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: Colors.grey),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        'Status',
-                                        style: TextStyle(color: Colors.grey),
+                              child: item['ItemImage'] != null &&
+                                      item['ItemImage'].isNotEmpty
+                                  ? CachedNetworkImage(
+                                      imageUrl: item['ItemImage'][0],
+                                      placeholder: (context, url) => Center(
+                                        child: CircularProgressIndicator(),
                                       ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 10),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          'View Menu',
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        //  Spacer(),
-                                        Padding(
-                                          padding: EdgeInsets.only(left: 5),
-                                          child: FaIcon(
-                                            FontAwesomeIcons.chevronRight,
-                                            size: 10,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                                      errorWidget: (context, url, error) =>
+                                          Icon(Icons.error),
+                                    )
+                                  : Icon(Icons.image_not_supported),
+                            ),
+                            Spacer(),
+                            Text(
+                              item['itemName'] ?? 'No Name',
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
                               ),
-                              Spacer(),
-                            ],
-                          ),
-                          Divider(
-                            color: Colors.black12,
-                            thickness: 0.5,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Row(
+                            ),
+                            Spacer(),
+                            Column(
                               children: [
                                 Container(
-                                  width: 25,
-                                  height: 25,
+                                  width: 100,
+                                  height: 40,
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(2),
-                                    border: Border.all(color: Colors.red),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.grey),
                                   ),
                                   child: Center(
-                                    child: FaIcon(
-                                      FontAwesomeIcons.solidCircle,
-                                      size: 10,
-                                      color: Colors.red,
+                                    child: Text(
+                                      item['Status'],
+                                      style: TextStyle(color: Colors.grey),
                                     ),
                                   ),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.only(left: 10),
-                                  child: Text(
-                                    '2 X ',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 10),
-                                  child: Text(
-                                    item['itemName'] ?? 'No Name',
-                                    style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Divider(
-                            color: Colors.black12,
-                            thickness: 0.5,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Row(
-                              children: [
-                                Text(
-                                  formattedDate,
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                Spacer(),
-                                Row(
-                                  children: [
-                                    Text(
-                                      "₹ ${item['price'] ?? 'N/A'}",
-                                      style: const TextStyle(
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding:
-                                          EdgeInsets.only(left: 3, right: 10),
-                                      child: FaIcon(
-                                        FontAwesomeIcons.chevronRight,
-                                        size: 10,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          Divider(
-                            color: Colors.black12,
-                            thickness: 0.5,
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Row(
-                              children: [
-                                Text(
-                                  'Rate',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(left: 17),
+                                  padding: EdgeInsets.only(top: 10),
                                   child: Row(
                                     children: [
-                                      FaIcon(
-                                        FontAwesomeIcons.star,
-                                        size: 15,
+                                      Text(
+                                        'View Menu',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                      FaIcon(
-                                        FontAwesomeIcons.star,
-                                        size: 15,
-                                      ),
-                                      FaIcon(
-                                        FontAwesomeIcons.star,
-                                        size: 15,
-                                      ),
-                                      FaIcon(
-                                        FontAwesomeIcons.star,
-                                        size: 15,
-                                      ),
-                                      FaIcon(
-                                        FontAwesomeIcons.star,
-                                        size: 15,
+                                      //  Spacer(),
+                                      Padding(
+                                        padding: EdgeInsets.only(left: 5),
+                                        child: FaIcon(
+                                          FontAwesomeIcons.chevronRight,
+                                          size: 10,
+                                          color: Colors.grey,
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
                               ],
                             ),
+                            Spacer(),
+                          ],
+                        ),
+                        Divider(
+                          color: Colors.black12,
+                          thickness: 0.5,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 10),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 25,
+                                height: 25,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(2),
+                                  border: Border.all(color: Colors.red),
+                                ),
+                                child: Center(
+                                  child: FaIcon(
+                                    FontAwesomeIcons.solidCircle,
+                                    size: 10,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(left: 10),
+                                child: Text(
+                                  item['quantity'].toString() + ' X',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(left: 10),
+                                child: Text(
+                                  item['itemName'] ?? 'No Name',
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        Divider(
+                          color: Colors.black12,
+                          thickness: 0.5,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 10),
+                          child: Row(
+                            children: [
+                              Text(
+                                formattedDate,
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              Spacer(),
+                              Row(
+                                children: [
+                                  Text(
+                                    "₹ ${item['price'] ?? 'N/A'}",
+                                    style: const TextStyle(
+                                      fontSize: 17,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding:
+                                        EdgeInsets.only(left: 3, right: 10),
+                                    child: FaIcon(
+                                      FontAwesomeIcons.chevronRight,
+                                      size: 10,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Divider(
+                          color: Colors.black12,
+                          thickness: 0.5,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 10),
+                          child: Row(
+                            children: [
+                              Text(
+                                'Rate',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(left: 17),
+                                child: Row(
+                                  children: [
+                                    FaIcon(
+                                      FontAwesomeIcons.star,
+                                      size: 15,
+                                    ),
+                                    FaIcon(
+                                      FontAwesomeIcons.star,
+                                      size: 15,
+                                    ),
+                                    FaIcon(
+                                      FontAwesomeIcons.star,
+                                      size: 15,
+                                    ),
+                                    FaIcon(
+                                      FontAwesomeIcons.star,
+                                      size: 15,
+                                    ),
+                                    FaIcon(
+                                      FontAwesomeIcons.star,
+                                      size: 15,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

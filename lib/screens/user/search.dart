@@ -1,4 +1,7 @@
 import 'dart:math';
+import 'package:bite_box/utils/Search_something.dart';
+import 'package:bite_box/utils/place_order.dart';
+import 'package:bite_box/utils/push_to_cart.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +20,9 @@ class _SearchState extends State<Search> {
   List _searchResults = [];
   List _allMenu = [];
   List _recentSearches = [];
+  Map<int, int> tapval = {};
+  Push_to_cart p = Push_to_cart();
+  SearchSomething ss = SearchSomething();
 
   @override
   void initState() {
@@ -30,6 +36,9 @@ class _SearchState extends State<Search> {
           await _firestore.collection('Menu').orderBy('Item Name').get();
       setState(() {
         _allMenu = data.docs;
+        for (var i = 0; i < _allMenu.length; i++) {
+          tapval[i] = 0;
+        }
       });
     } catch (e) {
       print('Error fetching menu data: $e');
@@ -144,13 +153,57 @@ class _SearchState extends State<Search> {
                                   color: Colors.black12,
                                   thickness: 0.5,
                                 ),
-                                Text(
-                                  "₹ ${item['Price'] ?? 'N/A'}",
-                                  style: const TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "₹ ${item['Price'] ?? 'N/A'}",
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          if (tapval[index] == 0) {
+                                            tapval[index] = 1;
+                                            p.PushtoCart(context, [item]);
+                                          } else {
+                                            tapval[index] = 0;
+                                            ss.searchSomethingFun(
+                                                context, item['Item Name'], 2);
+                                          }
+                                        });
+                                      },
+                                      child: Container(
+                                        width: 55,
+                                        height: 22,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                              color: Colors.orangeAccent),
+                                        ),
+                                        child: Center(
+                                          child: (tapval[index] == 1)
+                                              ? Text(
+                                                  'Added',
+                                                  style: TextStyle(
+                                                      color:
+                                                          Colors.orangeAccent),
+                                                )
+                                              : Text(
+                                                  'Add +',
+                                                  style: TextStyle(
+                                                      color:
+                                                          Colors.orangeAccent),
+                                                ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
                               ],
                             ),
                           ),
