@@ -127,19 +127,18 @@ class _DetailsState extends State<Details> {
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 7,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
-                  ),
                   child: CupertinoSearchTextField(
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 0,
+                            blurRadius: 2,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]),
                     focusNode: _searchFocusNode,
                     placeholder: 'Search',
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -164,78 +163,77 @@ class _DetailsState extends State<Details> {
                       var item =
                           val == 0 ? widget.data[index] : _searchResults[index];
 
-                      return Card(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          width: width * 0.9,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 0,
-                                blurRadius: 2,
-                                offset: const Offset(0, 1),
+                      return Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
+                        width: width * 0.9,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 0,
+                              blurRadius: 2,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 80,
+                              height: 100,
+                              margin: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: Colors.black12,
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                            ],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 80,
-                                height: 100,
-                                margin: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.black12,
-                                  borderRadius: BorderRadius.circular(10),
+                              child: item['Images'] != null &&
+                                      item['Images'].isNotEmpty
+                                  ? CachedNetworkImage(
+                                      imageUrl: item['Images'][0],
+                                      fit: BoxFit.fitWidth,
+                                      placeholder: (context, url) => Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(Icons.error),
+                                    )
+                                  : Icon(Icons.image_not_supported),
+                            ),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    top: 8.0, left: 8.0, right: 8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      item['Item Name'] ?? 'No Name',
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color.fromARGB(255, 82, 61, 0),
+                                      ),
+                                    ),
+                                    Divider(
+                                      color: Colors.black12,
+                                      thickness: 0.5,
+                                    ),
+                                    Text(
+                                      "₹ ${item['Price'] ?? 'N/A'}",
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                child: item['Images'] != null &&
-                                        item['Images'].isNotEmpty
-                                    ? CachedNetworkImage(
-                                        imageUrl: item['Images'][0],
-                                        placeholder: (context, url) => Center(
-                                          child: CircularProgressIndicator(),
-                                        ),
-                                        errorWidget: (context, url, error) =>
-                                            Icon(Icons.error),
-                                      )
-                                    : Icon(Icons.image_not_supported),
                               ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 8.0, left: 8.0, right: 8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item['Item Name'] ?? 'No Name',
-                                        style: const TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Divider(
-                                        color: Colors.black12,
-                                        thickness: 0.5,
-                                      ),
-                                      Text(
-                                        "₹ ${item['Price'] ?? 'N/A'}",
-                                        style: const TextStyle(
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       );
                     },

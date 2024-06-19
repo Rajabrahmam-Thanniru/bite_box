@@ -17,6 +17,10 @@ class Place_order {
       DocumentReference userDocRef =
           _firestore.collection('Users').doc(user.email);
       CollectionReference ordersCollection = userDocRef.collection('orders');
+      CollectionReference adminDocRef = _firestore
+          .collection('Admin')
+          .doc('biteboxcanteen@gmail.com')
+          .collection("Order Requests");
 
       for (var item in orderData) {
         await ordersCollection.add({
@@ -26,7 +30,16 @@ class Place_order {
           'price': item['Price'],
           'quantity': item['Quantity'],
           'orderDate': Timestamp.now(),
-          'Status': 'doing',
+          'Status': 'Not Accepted',
+        });
+        await adminDocRef.add({
+          'ItemImage': item['Images'],
+          'itemName': item['Item Name'],
+          'category': item['Item Category'],
+          'price': item['Price'],
+          'quantity': item['Quantity'],
+          'orderDate': Timestamp.now(),
+          'Status': 'Not Accepted',
         });
       }
 

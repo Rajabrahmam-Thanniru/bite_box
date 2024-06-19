@@ -126,8 +126,8 @@ class _MainUserHomeState extends State<MainUserHome> {
           category,
           style: const TextStyle(
             fontSize: 14,
-            color: Color.fromARGB(255, 169, 127, 0),
-            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(111, 106, 80, 0),
+            fontWeight: FontWeight.w100,
           ),
         ),
       ],
@@ -217,7 +217,7 @@ class _MainUserHomeState extends State<MainUserHome> {
                           width: (tapval[i] == 1) ? 90 : 80,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: Colors.orangeAccent),
+                            border: Border.all(color: Colors.amber[500]!),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.only(
@@ -227,12 +227,12 @@ class _MainUserHomeState extends State<MainUserHome> {
                                   ? Text(
                                       'Added',
                                       style:
-                                          TextStyle(color: Colors.orangeAccent),
+                                          TextStyle(color: Colors.amber[500]),
                                     )
                                   : Text(
                                       'Add +',
                                       style:
-                                          TextStyle(color: Colors.orangeAccent),
+                                          TextStyle(color: Colors.amber[500]),
                                     ),
                             ),
                           ),

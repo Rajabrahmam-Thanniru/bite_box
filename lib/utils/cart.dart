@@ -1,4 +1,5 @@
 import 'package:bite_box/screens/user/user_home.dart';
+import 'package:bite_box/utils/Hexcode.dart';
 import 'package:bite_box/utils/place_order.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -45,7 +46,6 @@ class _CartState extends State<Cart> {
           .get();
       setState(() {
         _cartList = data.docs;
-        // Initialize quantities for each item
         for (int i = 0; i < _cartList.length; i++) {
           _quantities[i] = 1;
         }
@@ -77,7 +77,6 @@ class _CartState extends State<Cart> {
   }
 
   void _proceedToCheckout() async {
-    // Check if _cartList and _quantities are populated
     if (_cartList.isEmpty || _quantities.isEmpty) {
       print('Cart is empty or quantities are not initialized properly.');
       return;
@@ -86,7 +85,6 @@ class _CartState extends State<Cart> {
     List<Map<String, dynamic>> orderData = [];
 
     try {
-      // Loop through _cartList and create orderData
       for (int i = 0; i < _cartList.length; i++) {
         var item = _cartList[i];
         int quantity = _quantities[i] ?? 1;
@@ -98,7 +96,7 @@ class _CartState extends State<Cart> {
           'Item Category': item['category'],
           'Price': price * quantity,
           'Quantity': quantity,
-          'Address': selectedAddress, // Add selected address to orderData
+          'Address': selectedAddress,
         });
       }
 
@@ -106,9 +104,6 @@ class _CartState extends State<Cart> {
       await placeOrder.PlaceOrder(context, orderData);
 
       await _clearCart();
-
-      // Navigate to the next screen or perform any other action after checkout
-      // For example, navigate back to the home screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -116,7 +111,6 @@ class _CartState extends State<Cart> {
       );
     } catch (e) {
       print('Error creating order data or placing order: $e');
-      // Handle any errors that occur during order creation or placement
     }
   }
 
@@ -125,7 +119,6 @@ class _CartState extends State<Cart> {
     User? user = _auth.currentUser;
 
     try {
-      // Delete all documents in the Cart collection for the current user
       QuerySnapshot<Map<String, dynamic>> cartSnapshot = await _firestore
           .collection('Users')
           .doc(user?.email)
@@ -139,7 +132,6 @@ class _CartState extends State<Cart> {
       print('Cart deleted successfully.');
     } catch (e) {
       print('Error deleting cart: $e');
-      // Handle any errors that occur while deleting the cart
     }
   }
 
@@ -166,7 +158,102 @@ class _CartState extends State<Cart> {
     final width = MediaQuery.of(context).size.width;
     int n = 4;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: HexColor('#F5F6FB'),
+      bottomNavigationBar: (_cartList.length == 0)
+          ? Container(
+              height: 100,
+            )
+          : Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              height: 90,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Spacer(),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: Container(
+                          width: width * 0.55,
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 255, 174, 0),
+                            borderRadius: BorderRadius.circular(7),
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              _proceedToCheckout();
+                            },
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 10),
+                                      child: Text(
+                                        '₹$_totalPrice',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 10),
+                                      child: Text(
+                                        'TOTAL',
+                                        style: TextStyle(
+                                          color: Color.fromARGB(
+                                              255, 255, 255, 255),
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w100,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Spacer(),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'Place order',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(right: 10),
+                                  child: Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      )),
+                ],
+              ),
+            ),
       appBar: AppBar(
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
@@ -194,11 +281,11 @@ class _CartState extends State<Cart> {
                           size: 18,
                         ),
                         Padding(
-                          padding: EdgeInsets.only(left: 5),
+                          padding: EdgeInsets.only(left: 20),
                           child: Text(
                             'Cart',
                             style: TextStyle(
-                              fontSize: 28,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -216,106 +303,100 @@ class _CartState extends State<Cart> {
       body: (_cartList.length == 0)
           ? Center(
               child: Text(
-                'no items add to cart',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                'No Items In The Cart',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
               ),
             )
-          : Column(
-              children: [
-                Container(
-                  width: width,
-                  height: (_cartList.length == 1)
-                      ? 150
-                      : (_cartList.length == 2)
-                          ? width * 0.7
-                          : width * 0.9,
-                  child: ListView.builder(
-                    itemCount: _cartList.length,
-                    itemBuilder: (context, index) {
-                      var item = _cartList[index];
-                      int price = item['price'] is int
-                          ? item['price']
-                          : int.parse(item['price']);
-                      int quantity = _quantities[index] ?? 1;
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(top: 8.0, left: 10, right: 10),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: _cartList.length,
+                            itemBuilder: (context, index) {
+                              var item = _cartList[index];
+                              int price = item['price'] is int
+                                  ? item['price']
+                                  : int.parse(item['price']);
+                              int quantity = _quantities[index] ?? 1;
 
-                      return Card(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          width: width * 0.9,
-                          height: 100,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 0,
-                                blurRadius: 2,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(top: 10),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 25,
-                                        height: 25,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(2),
-                                          border:
-                                              Border.all(color: Colors.green),
-                                        ),
-                                        child: Center(
-                                          child: FaIcon(
-                                            FontAwesomeIcons.solidCircle,
-                                            size: 10,
-                                            color: Colors.green,
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          width: 20,
+                                          height: 20,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(2),
+                                            border:
+                                                Border.all(color: Colors.green),
+                                          ),
+                                          child: Center(
+                                            child: Icon(
+                                              FontAwesomeIcons.solidCircle,
+                                              size: 10,
+                                              color: Colors.green,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      Padding(
-                                        padding: EdgeInsets.only(left: 10),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              item['itemName'] ?? 'No Name',
-                                              style: const TextStyle(
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.only(top: 5),
-                                              child: Text(
-                                                "₹ ${item['price'] ?? 'N/A'}",
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item['itemName'] ?? 'No Name',
                                                 style: const TextStyle(
-                                                  fontSize: 17,
+                                                  fontSize: 15,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                              SizedBox(height: 5),
+                                              Text(
+                                                "₹${item['price'] ?? 'N/A'}",
+                                                style: const TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.normal,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      Spacer(),
-                                      Padding(
-                                        padding: EdgeInsets.only(right: 10),
-                                        child: Column(
+                                        SizedBox(width: 10),
+                                        Column(
                                           children: [
                                             Container(
                                               width: 90,
                                               height: 35,
                                               decoration: BoxDecoration(
+                                                color: Color.fromARGB(
+                                                    25, 255, 193, 7),
                                                 borderRadius:
                                                     BorderRadius.circular(12),
                                                 border: Border.all(
@@ -323,7 +404,8 @@ class _CartState extends State<Cart> {
                                               ),
                                               child: Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment.center,
+                                                    MainAxisAlignment
+                                                        .spaceEvenly,
                                                 children: [
                                                   GestureDetector(
                                                     onTap: () {
@@ -332,29 +414,50 @@ class _CartState extends State<Cart> {
                                                           _quantities[index] =
                                                               quantity - 1;
                                                           _calculateBasePrice();
+                                                        } else {
+                                                          _firestore
+                                                              .collection(
+                                                                  'Users')
+                                                              .doc(FirebaseAuth
+                                                                  .instance
+                                                                  .currentUser!
+                                                                  .email)
+                                                              .collection(
+                                                                  'Cart')
+                                                              .doc(item.id)
+                                                              .delete();
+                                                          getCartItems();
+                                                          _quantities[index] =
+                                                              0;
+                                                          _calculateBasePrice();
                                                         }
                                                       });
                                                     },
-                                                    child: Text(
-                                                      '-',
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        color:
-                                                            Colors.orangeAccent,
+                                                    child: Container(
+                                                      width: 30,
+                                                      height: 30,
+                                                      decoration:
+                                                          BoxDecoration(),
+                                                      child: Center(
+                                                        child: Icon(
+                                                          Icons.remove,
+                                                          color: Colors
+                                                              .orangeAccent,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
-                                                  Padding(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            horizontal: 10),
-                                                    child: Text(
-                                                      "$quantity",
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        color:
-                                                            Colors.orangeAccent,
-                                                      ),
+                                                  Text(
+                                                    "$quantity",
+                                                    style: TextStyle(
+                                                      fontSize: quantity
+                                                                  .toString()
+                                                                  .length <=
+                                                              2
+                                                          ? 18
+                                                          : 16,
+                                                      color:
+                                                          Colors.orangeAccent,
                                                     ),
                                                   ),
                                                   GestureDetector(
@@ -365,276 +468,322 @@ class _CartState extends State<Cart> {
                                                         _calculateBasePrice();
                                                       });
                                                     },
-                                                    child: Text(
-                                                      '+',
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        color:
-                                                            Colors.orangeAccent,
+                                                    child: Container(
+                                                      width: 30,
+                                                      height: 30,
+                                                      decoration:
+                                                          BoxDecoration(),
+                                                      child: Center(
+                                                        child: Icon(
+                                                          Icons.add,
+                                                          color: Colors
+                                                              .orangeAccent,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             ),
-                                            Padding(
-                                              padding: EdgeInsets.only(top: 5),
-                                              child: Text(
-                                                "₹ ${price * quantity}",
-                                                style: const TextStyle(
-                                                  fontSize: 17,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-                  width: width * 0.9,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 0,
-                        blurRadius: 2,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: DropdownButtonFormField<String>(
-                    value: selectedAddress.isEmpty ? null : selectedAddress,
-                    decoration: const InputDecoration(
-                      hintText: 'Select your address',
-                      prefixIcon: Padding(
-                        padding: EdgeInsets.only(left: 5, right: 10),
-                        child: FaIcon(FontAwesomeIcons.locationDot),
-                      ),
-                      border: InputBorder.none,
-                    ),
-                    items: ['Block 1', 'Block 2', 'Block 3', 'Block 4']
-                        .map((address) => DropdownMenuItem<String>(
-                              value: address,
-                              child: Text(address),
-                            ))
-                        .toList(),
-                    onChanged: _checkAddress,
-                  ),
-                ),
-                Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  width: width * 0.9,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 0,
-                        blurRadius: 2,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Column(
-                    children: [
-                      (s == 1)
-                          ? Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(top: 10, left: 10),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        tapVal = 0;
-                                        _totalPrice = _basePrice;
-                                      });
-                                    },
-                                    child: Container(
-                                      width: 150,
-                                      height: 90,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                            color: (tapVal == 0)
-                                                ? Colors.orangeAccent
-                                                : Colors.grey),
-                                      ),
-                                      child: Padding(
-                                        padding:
-                                            EdgeInsets.only(left: 10, top: 10),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
+                                            SizedBox(height: 5),
                                             Text(
-                                              'Standard',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
+                                              "₹${price * quantity}",
+                                              style: const TextStyle(
                                                 fontSize: 15,
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                top: 10,
-                                              ),
-                                              child: Text(
-                                                'Your usual preparation time',
-                                                style: TextStyle(
-                                                  color: Colors.grey,
-                                                ),
+                                                fontWeight: FontWeight.normal,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ),
+                                      ],
                                     ),
                                   ),
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      tapVal = 1;
-                                      _totalPrice = _basePrice + deliveryCharge;
-                                    });
-                                  },
-                                  child: Padding(
-                                    padding: EdgeInsets.only(top: 10, left: 10),
-                                    child: Container(
-                                      width: 150,
-                                      height: 90,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                            color: (tapVal == 1)
-                                                ? Colors.orangeAccent
-                                                : Colors.grey),
-                                      ),
-                                      child: Padding(
-                                        padding:
-                                            EdgeInsets.only(left: 10, top: 10),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  'Delivery',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 15,
-                                                  ),
-                                                ),
-                                                Spacer(),
-                                                Padding(
-                                                  padding: EdgeInsets.only(
-                                                      right: 10),
-                                                  child: Text(
-                                                    '₹ $deliveryCharge ',
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.only(
-                                                top: 10,
-                                              ),
-                                              child: Text(
-                                                'We will deliver the item to your location ',
-                                                style: TextStyle(
-                                                  color: Colors.grey,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Container(
-                              height: s == 1
-                                  ? 0
-                                  : 50, // Adjust the height based on visibility
-                            ),
-                      Container(
-                        margin: const EdgeInsets.all(10),
-                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: _showAddressSelectionBottomSheet,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.orangeAccent),
-                          borderRadius: BorderRadius.circular(12),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: TextField(
-                          decoration: const InputDecoration(
-                            hintText: 'Add a note to canteen',
-                            prefixIcon: Padding(
-                              padding: EdgeInsets.only(left: 5, right: 10),
-                              child: FaIcon(FontAwesomeIcons.clipboard),
-                            ),
-                            border: InputBorder.none,
-                          ),
-                          controller: note,
-                          maxLines: 3,
-                        ),
-                      ),
-                      Text(
-                        "Total Price: ₹$_totalPrice",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: ElevatedButton(
-                          onPressed: _proceedToCheckout,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orangeAccent,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 100, vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: Text(
-                            'Proceed',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Row(
+                                children: <Widget>[
+                                  Icon(
+                                    Icons.location_on,
+                                    color: Colors.amber[500],
+                                  ),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    'Deliver to:',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                    ),
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    selectedAddress.isEmpty
+                                        ? 'Select your address'
+                                        : selectedAddress,
+                                    style: TextStyle(
+                                      color: selectedAddress.isEmpty
+                                          ? Colors.grey[600]
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Icon(Icons.arrow_drop_down),
+                            ],
                           ),
                         ),
                       ),
-                    ],
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 10),
+                    padding: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 0,
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Visibility(
+                          visible: s == 1,
+                          child: Row(
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    tapVal = 0;
+                                    _totalPrice = _basePrice;
+                                  });
+                                },
+                                child: Container(
+                                  width: 150,
+                                  height: 90,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                        color: (tapVal == 0)
+                                            ? Colors.orangeAccent
+                                            : Colors.grey),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10.0),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          'Standard',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        SizedBox(height: 5),
+                                        Text(
+                                          'Your usual preparation time',
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    tapVal = 1;
+                                    _totalPrice = _basePrice + deliveryCharge;
+                                  });
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.only(left: 10.0),
+                                  child: Container(
+                                    width: 150,
+                                    height: 90,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                          color: (tapVal == 1)
+                                              ? Colors.orangeAccent
+                                              : Colors.grey),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Text(
+                                                'Delivery',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                              Spacer(),
+                                              Text(
+                                                '₹ $deliveryCharge ',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 15,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: 5),
+                                          Text(
+                                            'We will deliver the item to your location ',
+                                            style: TextStyle(
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.orangeAccent),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Add a note to canteen',
+                              prefixIcon: Padding(
+                                padding: EdgeInsets.only(left: 5, right: 10),
+                                child: Icon(Icons.content_paste_rounded),
+                              ),
+                              border: InputBorder.none,
+                              contentPadding:
+                                  EdgeInsets.symmetric(horizontal: 15),
+                            ),
+                            controller: note,
+                            maxLines: 3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  void _showAddressSelectionBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  'Select an Address',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ],
-            ),
+              ),
+              ListTile(
+                leading: Icon(Icons.location_on, color: Colors.amber[500]),
+                title: Text('Block 1'),
+                onTap: () {
+                  _checkAddress('Block 1');
+                  Navigator.pop(context);
+                },
+                selected: selectedAddress == 'Block 1',
+                selectedTileColor:
+                    Colors.amber[100], // Highlight color when selected
+              ),
+              ListTile(
+                leading: Icon(Icons.location_on, color: Colors.amber[500]),
+                title: Text('Block 2'),
+                onTap: () {
+                  _checkAddress('Block 2');
+                  Navigator.pop(context);
+                },
+                selected: selectedAddress == 'Block 2',
+                selectedTileColor:
+                    Colors.amber[100], // Highlight color when selected
+              ),
+              ListTile(
+                leading: Icon(Icons.location_on, color: Colors.amber[500]),
+                title: Text('Block 3'),
+                onTap: () {
+                  _checkAddress('Block 3');
+                  Navigator.pop(context);
+                },
+                selected: selectedAddress == 'Block 3',
+                selectedTileColor:
+                    Colors.amber[100], // Highlight color when selected
+              ),
+              ListTile(
+                leading: Icon(Icons.location_on, color: Colors.amber[500]),
+                title: Text('Block 4'),
+                onTap: () {
+                  _checkAddress('Block 4');
+                  Navigator.pop(context);
+                },
+                selected: selectedAddress == 'Block 4',
+                selectedTileColor:
+                    Colors.amber[100], // Highlight color when selected
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

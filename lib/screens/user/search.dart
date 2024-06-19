@@ -3,6 +3,7 @@ import 'package:bite_box/utils/Search_something.dart';
 import 'package:bite_box/utils/place_order.dart';
 import 'package:bite_box/utils/push_to_cart.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,6 +24,7 @@ class _SearchState extends State<Search> {
   Map<int, int> tapval = {};
   Push_to_cart p = Push_to_cart();
   SearchSomething ss = SearchSomething();
+  final user = FirebaseAuth.instance.currentUser?.email;
 
   @override
   void initState() {
@@ -79,6 +81,9 @@ class _SearchState extends State<Search> {
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   onChanged: (value) {
                     _search(value);
+                  },
+                  onSubmitted: (value) {
+                    _add(value);
                   },
                 ),
               ),
@@ -237,5 +242,16 @@ class _SearchState extends State<Search> {
       }
     }
     setState(() {});
+  }
+
+  void _add(String value) {
+    _firestore.collection("Users").doc(user).collection("Search History").add({
+      'searchTerm': value,
+      'timestamp': DateTime.now(),
+    }).then((value) {
+      print('Search added to history');
+    }).catchError((error) {
+      print('Failed to add search to history: $error');
+    });
   }
 }
