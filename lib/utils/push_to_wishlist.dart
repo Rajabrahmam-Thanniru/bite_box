@@ -2,14 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class Push_to_cart {
-  Future<void> PushtoCart(
+class Push_to_wishlist {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  Future<void> Pushtowishlist(
     BuildContext context,
     List order,
   ) async {
-    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-
     try {
       // Get the currently authenticated user
       User? user = _auth.currentUser;
@@ -19,7 +19,7 @@ class Push_to_cart {
 
       DocumentReference userDocRef =
           _firestore.collection('Users').doc(user.email);
-      CollectionReference ordersCollection = userDocRef.collection('Cart');
+      CollectionReference ordersCollection = userDocRef.collection('wishList');
 
       for (var item in order) {
         await ordersCollection.add({
@@ -27,10 +27,8 @@ class Push_to_cart {
           'Item Name': item['Item Name'],
           'Item Category': item['Item Category'],
           'Price': item['Price'],
-          'orderDate': Timestamp.now(),
-          'Item Description': item['Item Description'],
           'Type': item['Type'],
-          'Status': 'doing',
+          'Item Description': item['Item Description'],
           'Consists Of': item['Consists Of'],
         });
       }
@@ -43,6 +41,28 @@ class Push_to_cart {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error placing order: $e')),
       );
+    }
+  }
+
+  Future<void> delete_item_wishlist(
+    BuildContext context,
+    String item,
+  ) async {
+    User? user = _auth.currentUser;
+    if (user == null) {
+      throw Exception("User is not authenticated");
+    }
+    DocumentReference userDocRef =
+        _firestore.collection('Users').doc(user.email);
+    CollectionReference cartCollection = userDocRef.collection('wishList');
+
+    QuerySnapshot<Object?> cartItems = await cartCollection.get();
+
+    for (var doc in cartItems.docs) {
+      if (doc['Item Name'].toString().replaceAll(' ', '').toLowerCase() ==
+          item.replaceAll(' ', '').toLowerCase()) {
+        await doc.reference.delete();
+      }
     }
   }
 }

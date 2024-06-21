@@ -1,11 +1,17 @@
+import 'dart:async';
+
 import 'package:bite_box/utils/Hexcode.dart';
 import 'package:bite_box/utils/Search_something.dart';
+import 'package:bite_box/utils/cart.dart';
 import 'package:bite_box/utils/place_order.dart';
+import 'package:bite_box/utils/push_to_wishlist.dart';
 import 'package:bite_box/utils/signOut.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:video_player/video_player.dart';
 
 class MainUserHome extends StatefulWidget {
@@ -16,14 +22,17 @@ class MainUserHome extends StatefulWidget {
 }
 
 class _MainUserHomeState extends State<MainUserHome> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   SearchSomething searchSomething = SearchSomething();
   List<String> featured = [];
   List<String> featuredImages = [];
   List<int> featuredPrices = [];
-  Map<int, int> tapval = {};
+  List<String> _cartnames = [];
+  Set<String> likedItems = {};
   late VideoPlayerController _controller;
-
   Place_order po = Place_order();
+  Push_to_wishlist pw = Push_to_wishlist();
+  List _wishlist_item = [];
 
   @override
   void initState() {
@@ -36,6 +45,8 @@ class _MainUserHomeState extends State<MainUserHome> {
           _controller.setLooping(true);
         });
       });
+    cartNames();
+    wishList_names();
   }
 
   @override
@@ -76,10 +87,6 @@ class _MainUserHomeState extends State<MainUserHome> {
       featured = newFeatured;
       featuredImages = newFeaturedImages;
       featuredPrices = newFeaturedPrices;
-      tapval.clear();
-      for (var i = 0; i < featuredImages.length; i++) {
-        tapval[i] = 0;
-      }
     });
   }
 
@@ -126,125 +133,216 @@ class _MainUserHomeState extends State<MainUserHome> {
           category,
           style: const TextStyle(
             fontSize: 14,
-            color: Color.fromARGB(111, 106, 80, 0),
-            fontWeight: FontWeight.w100,
+            color: Color.fromARGB(255, 169, 127, 0),
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
     );
   }
 
+  Future<void> cartNames() async {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    User? user = _auth.currentUser;
+
+    try {
+      QuerySnapshot<Map<String, dynamic>> data = await _firestore
+          .collection('Users')
+          .doc(user?.email)
+          .collection('Cart')
+          .get();
+      setState(() {
+        _cartnames = data.docs
+            .map((doc) =>
+                (doc['Item Name'] as String).replaceAll(' ', '').toLowerCase())
+            .toList();
+      });
+    } catch (e) {
+      print('Error fetching wishlist data: $e');
+    }
+    print(_cartnames.length);
+    _setFeaturedItems();
+  }
+
+  bool checkItemContainsCart(String item) {
+    return _cartnames.contains(item);
+  }
+
+  Future<void> wishList_names() async {
+    _wishlist_item.clear();
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    User? user = _auth.currentUser;
+
+    try {
+      QuerySnapshot<Map<String, dynamic>> data = await _firestore
+          .collection('Users')
+          .doc(user?.email)
+          .collection('wishList')
+          .get();
+      setState(() {
+        _wishlist_item = data.docs
+            .map((doc) =>
+                (doc['Item Name'] as String).replaceAll(' ', '').toLowerCase())
+            .toList();
+      });
+    } catch (e) {
+      print('Error fetching wishlist data: $e');
+    }
+    print(_wishlist_item.length);
+  }
+
   Widget _buildFeaturedItem(String item, String image, int price, int i) {
     final width = MediaQuery.of(context).size.width;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      width: width * 0.9,
-      height: 100,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 0,
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 80,
-            height: 100,
-            margin: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.black12,
-              borderRadius: BorderRadius.circular(10),
-              image: DecorationImage(
-                image: AssetImage(image),
+
+    // Check if item is in cart
+    bool inCart = _cartnames.contains(item.replaceAll(' ', '').toLowerCase());
+    bool isliked =
+        _wishlist_item.contains(item.replaceAll(' ', '').toLowerCase());
+
+    return GestureDetector(
+      onTap: () {
+        searchSomething.searchSomethingFun(context, item, 4);
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        width: width * 0.9,
+        height: 100,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 0,
+              blurRadius: 2,
+              offset: const Offset(0, 1),
+            ),
+          ],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 80,
+              height: 100,
+              margin: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(10),
+                image: DecorationImage(
+                  image: AssetImage(image),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        item,
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        '₹ $price',
-                        style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Divider(
-                    color: Colors.black12,
-                    thickness: 0.5,
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 8.0, left: 8.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            if (tapval[i] == 0) {
-                              tapval[i] = 1;
-                              searchSomething.searchSomethingFun(
-                                  context, item, 1);
-                            } else {
-                              tapval[i] = 0;
-                              searchSomething.searchSomethingFun(
-                                  context, item, 2);
-                            }
-                          });
-                        },
-                        child: Container(
-                          width: (tapval[i] == 1) ? 90 : 80,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(4),
-                            border: Border.all(color: Colors.amber[500]!),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          item,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
                           ),
+                        ),
+                        Spacer(),
+                        Padding(
+                          padding: EdgeInsets.only(right: 10),
+                          child: GestureDetector(
+                            onTap: () async {
+                              if (isliked) {
+                                await pw.delete_item_wishlist(context, item);
+                              } else {
+                                await searchSomething.searchSomethingFun(
+                                    context, item, 2);
+                              }
+                              await wishList_names();
+                            },
+                            child: (isliked)
+                                ? FaIcon(
+                                    FontAwesomeIcons.solidHeart,
+                                    color: Colors.red,
+                                  )
+                                : FaIcon(
+                                    FontAwesomeIcons.heart,
+                                    size: 18,
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Divider(
+                      color: Colors.black12,
+                      thickness: 0.5,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          '₹ $price',
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Spacer(),
+                        Align(
+                          alignment: Alignment.centerRight,
                           child: Padding(
-                            padding: const EdgeInsets.only(
-                                left: 20, right: 20, top: 5, bottom: 5),
-                            child: Center(
-                              child: (tapval[i] == 1)
-                                  ? Text(
-                                      'Added',
+                            padding: const EdgeInsets.only(top: 8.0, left: 8.0),
+                            child: GestureDetector(
+                              onTap: () async {
+                                if (inCart) {
+                                  // Navigate to cart screen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => Cart()),
+                                  );
+                                } else {
+                                  // Add to cart logic
+                                  await searchSomething.searchSomethingFun(
+                                      context, item, 1);
+                                  await cartNames(); // Refresh cart names after adding
+                                  setState(() {
+                                    // Update the state to reflect the change
+                                    inCart = true;
+                                  });
+                                }
+                              },
+                              child: Container(
+                                width: inCart ? 90 : 80,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(4),
+                                  border:
+                                      Border.all(color: Colors.orangeAccent),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 20, right: 20, top: 5, bottom: 5),
+                                  child: Center(
+                                    child: Text(
+                                      inCart ? 'Added' : 'Add +',
                                       style:
-                                          TextStyle(color: Colors.amber[500]),
-                                    )
-                                  : Text(
-                                      'Add +',
-                                      style:
-                                          TextStyle(color: Colors.amber[500]),
+                                          TextStyle(color: Colors.orangeAccent),
                                     ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  ),
-                ],
+                      ],
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -258,6 +356,7 @@ class _MainUserHomeState extends State<MainUserHome> {
       body: RefreshIndicator(
         onRefresh: () async {
           _setFeaturedItems();
+          cartNames();
         },
         child: SingleChildScrollView(
           child: Column(
@@ -347,12 +446,8 @@ class _MainUserHomeState extends State<MainUserHome> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: featured.length,
                 itemBuilder: (context, index) {
-                  return _buildFeaturedItem(
-                    featured[index],
-                    featuredImages[index],
-                    featuredPrices[index],
-                    index,
-                  );
+                  return _buildFeaturedItem(featured[index],
+                      featuredImages[index], featuredPrices[index], index);
                 },
               ),
             ],

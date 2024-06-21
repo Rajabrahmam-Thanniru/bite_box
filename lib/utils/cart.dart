@@ -59,9 +59,9 @@ class _CartState extends State<Cart> {
   void _calculateBasePrice() {
     int totalPrice = 0;
     for (int i = 0; i < _cartList.length; i++) {
-      int price = _cartList[i]['price'] is int
-          ? _cartList[i]['price']
-          : int.parse(_cartList[i]['price']);
+      int price = _cartList[i]['Price'] is int
+          ? _cartList[i]['Price']
+          : int.parse(_cartList[i]['Price']);
       totalPrice += price * _quantities[i]!;
     }
     setState(() {
@@ -77,8 +77,6 @@ class _CartState extends State<Cart> {
   }
 
   void _proceedToCheckout() async {
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-    User? user = _auth.currentUser;
     if (_cartList.isEmpty || _quantities.isEmpty) {
       print('Cart is empty or quantities are not initialized properly.');
       return;
@@ -91,23 +89,22 @@ class _CartState extends State<Cart> {
         var item = _cartList[i];
         int quantity = _quantities[i] ?? 1;
         int price =
-            item['price'] is int ? item['price'] : int.parse(item['price']);
+            item['Price'] is int ? item['Price'] : int.parse(item['Price']);
         orderData.add({
-          'Images': item['ItemImage'],
-          'Item Name': item['itemName'],
-          'Item Category': item['category'],
+          'Images': item['Images'],
+          'Item Name': item['Item Name'],
+          'Item Category': item['Item Category'],
           'Price': price * quantity,
           'Quantity': quantity,
           'Address': selectedAddress,
-          'Email': user?.email,
+          'Type': item['Type'],
+          'Item Description': item['Item Description'],
+          'Consists Of': item['Consists Of'],
         });
       }
 
       Place_order placeOrder = Place_order();
-      await placeOrder.PlaceOrder(
-        context,
-        orderData,
-      );
+      await placeOrder.PlaceOrder(context, orderData);
 
       await _clearCart();
       Navigator.pushReplacement(
@@ -334,9 +331,9 @@ class _CartState extends State<Cart> {
                             itemCount: _cartList.length,
                             itemBuilder: (context, index) {
                               var item = _cartList[index];
-                              int price = item['price'] is int
-                                  ? item['price']
-                                  : int.parse(item['price']);
+                              int price = item['Price'] is int
+                                  ? item['Price']
+                                  : int.parse(item['Price']);
                               int quantity = _quantities[index] ?? 1;
 
                               return Padding(
@@ -354,19 +351,31 @@ class _CartState extends State<Cart> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Container(
-                                          width: 20,
-                                          height: 20,
+                                          width: 25,
+                                          height: 25,
                                           decoration: BoxDecoration(
                                             borderRadius:
                                                 BorderRadius.circular(2),
-                                            border:
-                                                Border.all(color: Colors.green),
+                                            border: Border.all(
+                                                color: (item['Type']
+                                                            .toString()
+                                                            .replaceAll(' ', '')
+                                                            .toLowerCase() ==
+                                                        'non-veg')
+                                                    ? Colors.red
+                                                    : Colors.green),
                                           ),
                                           child: Center(
-                                            child: Icon(
+                                            child: FaIcon(
                                               FontAwesomeIcons.solidCircle,
                                               size: 10,
-                                              color: Colors.green,
+                                              color: (item['Type']
+                                                          .toString()
+                                                          .replaceAll(' ', '')
+                                                          .toLowerCase() ==
+                                                      'non-veg')
+                                                  ? Colors.red
+                                                  : Colors.green,
                                             ),
                                           ),
                                         ),
@@ -377,15 +386,16 @@ class _CartState extends State<Cart> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                item['itemName'] ?? 'No Name',
+                                                item['Item Name'] ?? 'No Name',
                                                 style: const TextStyle(
                                                   fontSize: 15,
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                               ),
+                                              Text(item['Type']),
                                               SizedBox(height: 5),
                                               Text(
-                                                "₹${item['price'] ?? 'N/A'}",
+                                                "₹${item['Price'] ?? 'N/A'}",
                                                 style: const TextStyle(
                                                   fontSize: 15,
                                                   fontWeight: FontWeight.normal,
@@ -592,7 +602,7 @@ class _CartState extends State<Cart> {
                                 },
                                 child: Container(
                                   width: 150,
-                                  height: 130,
+                                  height: 90,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
@@ -625,7 +635,6 @@ class _CartState extends State<Cart> {
                                   ),
                                 ),
                               ),
-                              Spacer(),
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -637,7 +646,7 @@ class _CartState extends State<Cart> {
                                   padding: const EdgeInsets.only(left: 10.0),
                                   child: Container(
                                     width: 150,
-                                    height: 130,
+                                    height: 90,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
