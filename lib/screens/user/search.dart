@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:bite_box/utils/Search_something.dart';
-import 'package:bite_box/utils/place_order.dart';
 import 'package:bite_box/utils/push_to_cart.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';

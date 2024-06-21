@@ -77,6 +77,8 @@ class _CartState extends State<Cart> {
   }
 
   void _proceedToCheckout() async {
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+    User? user = _auth.currentUser;
     if (_cartList.isEmpty || _quantities.isEmpty) {
       print('Cart is empty or quantities are not initialized properly.');
       return;
@@ -97,11 +99,15 @@ class _CartState extends State<Cart> {
           'Price': price * quantity,
           'Quantity': quantity,
           'Address': selectedAddress,
+          'Email': user?.email,
         });
       }
 
       Place_order placeOrder = Place_order();
-      await placeOrder.PlaceOrder(context, orderData);
+      await placeOrder.PlaceOrder(
+        context,
+        orderData,
+      );
 
       await _clearCart();
       Navigator.pushReplacement(
@@ -586,7 +592,7 @@ class _CartState extends State<Cart> {
                                 },
                                 child: Container(
                                   width: 150,
-                                  height: 90,
+                                  height: 130,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
@@ -619,6 +625,7 @@ class _CartState extends State<Cart> {
                                   ),
                                 ),
                               ),
+                              Spacer(),
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -630,7 +637,7 @@ class _CartState extends State<Cart> {
                                   padding: const EdgeInsets.only(left: 10.0),
                                   child: Container(
                                     width: 150,
-                                    height: 90,
+                                    height: 130,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(

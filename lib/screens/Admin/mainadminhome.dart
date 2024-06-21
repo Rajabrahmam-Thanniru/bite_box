@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:bite_box/utils/signOut.dart';
 import 'package:flutter/material.dart';
 
