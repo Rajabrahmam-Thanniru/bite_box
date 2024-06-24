@@ -137,14 +137,16 @@ class _AdminOrderRequestsState extends State<AdminOrderRequests> {
                                 width: 70,
                                 height: 70,
                                 margin: const EdgeInsets.all(10),
+                                clipBehavior: Clip.antiAlias,
                                 decoration: BoxDecoration(
                                   color: Colors.black12,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: item['ItemImage'] != null &&
-                                        item['ItemImage'].isNotEmpty
+                                child: item['Images'] != null &&
+                                        item['Images'].isNotEmpty
                                     ? CachedNetworkImage(
-                                        imageUrl: item['ItemImage'][0],
+                                        imageUrl: item['Images'][0],
+                                        fit: BoxFit.cover,
                                         placeholder: (context, url) => Center(
                                           child: CircularProgressIndicator(),
                                         ),
@@ -154,7 +156,7 @@ class _AdminOrderRequestsState extends State<AdminOrderRequests> {
                                     : Icon(Icons.image_not_supported),
                               ),
                               Text(
-                                item['itemName'] ?? 'No Name',
+                                item['Item Name'] ?? 'No Name',
                                 style: const TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.bold,
@@ -227,7 +229,7 @@ class _AdminOrderRequestsState extends State<AdminOrderRequests> {
                                 Padding(
                                   padding: EdgeInsets.only(left: 10),
                                   child: Text(
-                                    item['itemName'] ?? 'No Name',
+                                    item['Item Name'] ?? 'No Name',
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -259,7 +261,7 @@ class _AdminOrderRequestsState extends State<AdminOrderRequests> {
                                       padding:
                                           const EdgeInsets.only(right: 8.0),
                                       child: Text(
-                                        "₹ ${item['price'] ?? 'N/A'}",
+                                        "₹ ${item['Price'] ?? 'N/A'}",
                                         style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
@@ -357,16 +359,18 @@ class _AdminOrderRequestsState extends State<AdminOrderRequests> {
           .doc(user?.email)
           .collection('Orders')
           .add({
-        'itemName': item['itemName'],
-        'ItemImage': item['ItemImage'],
-        'price': item['price'],
-        'quantity': item['quantity'],
-        'orderDate': item['orderDate'],
-        'Status': 'Accepted',
-        'Address': item['Address'],
-        'category': item['category'],
-        'Email': item['Email'],
         'OrderId': item['OrderId'],
+        'Images': item['Images'],
+        'Item Name': item['Item Name'],
+        'Item Category': item['Item Category'],
+        'Price': item['Price'],
+        'quantity': item['quantity'],
+        'orderDate': Timestamp.now(),
+        'Status': 'Accepted',
+        'Item Description': item['Item Description'],
+        'Type': item['Type'],
+        'Address': item['Address'],
+        'Email': item['Email']
       });
       await _firestore
           .collection('Admin')

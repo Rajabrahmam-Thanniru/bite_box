@@ -39,10 +39,10 @@ class _AdminRevenueState extends State<AdminRevenue> {
 
       for (var doc in data.docs) {
         double price =
-            (doc['price'] ?? 0).toDouble(); // Convert price to double
+            (doc['Price'] ?? 0).toDouble(); // Convert price to double
         revenue += price;
 
-        String itemName = doc['itemName'];
+        String itemName = doc['Item Name'];
         tempItemRevenue[itemName] ??= 0.0; // Initialize if null
         tempItemRevenue[itemName] =
             (tempItemRevenue[itemName] ?? 0.0) + price; // Safe addition

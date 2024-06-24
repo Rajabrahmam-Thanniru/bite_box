@@ -349,7 +349,7 @@ class CustomDrawer extends StatelessWidget {
                 ),
                 Divider(
                   color: Colors.black,
-                  thickness: 1,
+                  thickness: 0,
                   indent: 0,
                   endIndent: 0,
                 ),
@@ -372,34 +372,30 @@ class CustomDrawer extends StatelessWidget {
                 ),
                 Divider(
                   color: Colors.black,
-                  thickness: 1,
+                  thickness: 0,
                   indent: 0,
                   endIndent: 0,
                 ),
                 ListTile(
                   leading: Icon(
-                    Icons.fastfood,
+                    Icons.person,
                     color: Colors.black,
                   ),
                   title: Text(
-                    'Inventory',
+                    'Profile',
                     style: TextStyle(
                       fontFamily: 'Roboto',
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Cart(),
-                      ),
-                    );
+                    handleNavigation(3);
+                    Navigator.pop(context);
                   },
                 ),
                 Divider(
                   color: Colors.black,
-                  thickness: 1,
+                  thickness: 0,
                   indent: 0,
                   endIndent: 0,
                 ),

@@ -74,11 +74,14 @@ class _LikedState extends State<Liked> {
         children: [
           Padding(
             padding: const EdgeInsets.only(left: 20, top: 20),
-            child: Text(
-              'Your Liked Items',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 25,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Your Liked Items',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                ),
               ),
             ),
           ),
@@ -88,53 +91,108 @@ class _LikedState extends State<Liked> {
               itemBuilder: (context, index) {
                 var item = _orderList[index];
 
-                return Card(
-                  child: Container(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    width: width * 0.9,
-                    height: 190,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 0,
-                          blurRadius: 2,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
+                return Container(
+                  margin:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  width: width * 0.9,
+                  height: 190,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 0,
+                        blurRadius: 2,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 70,
+                            height: 70,
+                            margin: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.black12,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: item['Images'] != null &&
+                                    item['Images'].isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: item['Images'][0],
+                                    placeholder: (context, url) => Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
+                                  )
+                                : Icon(Icons.image_not_supported),
+                          ),
+                          Spacer(),
+                          Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              item['Item Name'] ?? 'No Name',
+                              style: const TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          Spacer(),
+                          Padding(
+                            padding: EdgeInsets.only(right: 10),
+                            child: FaIcon(
+                              FontAwesomeIcons.solidHeart,
+                              color: Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Divider(
+                        color: Colors.black12,
+                        thickness: 0.5,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Row(
                           children: [
                             Container(
-                              width: 70,
-                              height: 70,
-                              margin: const EdgeInsets.all(10),
+                              width: 25,
+                              height: 25,
                               decoration: BoxDecoration(
-                                color: Colors.black12,
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(2),
+                                border: Border.all(
+                                    color: (item['Type']
+                                                .toString()
+                                                .replaceAll(' ', '')
+                                                .toLowerCase() ==
+                                            'non-veg')
+                                        ? Colors.red
+                                        : Colors.green),
                               ),
-                              child: item['Images'] != null &&
-                                      item['Images'].isNotEmpty
-                                  ? CachedNetworkImage(
-                                      imageUrl: item['Images'][0],
-                                      placeholder: (context, url) => Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          Icon(Icons.error),
-                                    )
-                                  : Icon(Icons.image_not_supported),
+                              child: Center(
+                                child: FaIcon(
+                                  FontAwesomeIcons.solidCircle,
+                                  size: 10,
+                                  color: (item['Type']
+                                              .toString()
+                                              .replaceAll(' ', '')
+                                              .toLowerCase() ==
+                                          'non-veg')
+                                      ? Colors.red
+                                      : Colors.green,
+                                ),
+                              ),
                             ),
-                            Spacer(),
-                            Align(
-                              alignment: Alignment.center,
+                            Padding(
+                              padding: EdgeInsets.only(left: 10),
                               child: Text(
-                                item['Item Name'] ?? 'No Name',
+                                item['Item Category'] ?? 'No Name',
                                 style: const TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.bold,
@@ -144,120 +202,63 @@ class _LikedState extends State<Liked> {
                             Spacer(),
                             Padding(
                               padding: EdgeInsets.only(right: 10),
-                              child: FaIcon(
-                                FontAwesomeIcons.solidHeart,
-                                color: Colors.red,
+                              child: Text(
+                                "₹ ${item['Price'] ?? 'N/A'}",
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      Divider(
+                        color: Colors.black12,
+                        thickness: 0.5,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Row(
+                          children: [
+                            Text(
+                              'Rate',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 17),
+                              child: Row(
+                                children: [
+                                  FaIcon(
+                                    FontAwesomeIcons.star,
+                                    size: 15,
+                                  ),
+                                  FaIcon(
+                                    FontAwesomeIcons.star,
+                                    size: 15,
+                                  ),
+                                  FaIcon(
+                                    FontAwesomeIcons.star,
+                                    size: 15,
+                                  ),
+                                  FaIcon(
+                                    FontAwesomeIcons.star,
+                                    size: 15,
+                                  ),
+                                  FaIcon(
+                                    FontAwesomeIcons.star,
+                                    size: 15,
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
-                        Divider(
-                          color: Colors.black12,
-                          thickness: 0.5,
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 10),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 25,
-                                height: 25,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(2),
-                                  border: Border.all(
-                                      color: (item['Type']
-                                                  .toString()
-                                                  .replaceAll(' ', '')
-                                                  .toLowerCase() ==
-                                              'non-veg')
-                                          ? Colors.red
-                                          : Colors.green),
-                                ),
-                                child: Center(
-                                  child: FaIcon(
-                                    FontAwesomeIcons.solidCircle,
-                                    size: 10,
-                                    color: (item['Type']
-                                                .toString()
-                                                .replaceAll(' ', '')
-                                                .toLowerCase() ==
-                                            'non-veg')
-                                        ? Colors.red
-                                        : Colors.green,
-                                  ),
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(left: 10),
-                                child: Text(
-                                  item['Item Category'] ?? 'No Name',
-                                  style: const TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                              Spacer(),
-                              Padding(
-                                padding: EdgeInsets.only(right: 10),
-                                child: Text(
-                                  "₹ ${item['Price'] ?? 'N/A'}",
-                                  style: const TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                        ),
-                        Divider(
-                          color: Colors.black12,
-                          thickness: 0.5,
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 10),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Rate',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.only(left: 17),
-                                child: Row(
-                                  children: [
-                                    FaIcon(
-                                      FontAwesomeIcons.star,
-                                      size: 15,
-                                    ),
-                                    FaIcon(
-                                      FontAwesomeIcons.star,
-                                      size: 15,
-                                    ),
-                                    FaIcon(
-                                      FontAwesomeIcons.star,
-                                      size: 15,
-                                    ),
-                                    FaIcon(
-                                      FontAwesomeIcons.star,
-                                      size: 15,
-                                    ),
-                                    FaIcon(
-                                      FontAwesomeIcons.star,
-                                      size: 15,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 );
               },

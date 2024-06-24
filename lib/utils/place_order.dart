@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class Place_order {
   Future<void> PlaceOrder(
@@ -17,19 +18,54 @@ class Place_order {
       DocumentReference userDocRef =
           _firestore.collection('Users').doc(user.email);
       CollectionReference ordersCollection = userDocRef.collection('orders');
+      CollectionReference adminDocRef = _firestore
+          .collection('Admin')
+          .doc('biteboxcanteen@gmail.com')
+          .collection("Order Requests");
 
       for (var item in orderData) {
+        String orderId;
+        bool isUnique = false;
+
+        do {
+          orderId = Random().nextInt(1000000000).toString();
+          QuerySnapshot querySnapshot = await adminDocRef
+              .where('OrderId', isEqualTo: orderId)
+              .limit(1)
+              .get();
+
+          if (querySnapshot.docs.isEmpty) {
+            isUnique = true;
+          }
+        } while (!isUnique);
+
         await ordersCollection.add({
+          'OrderId': orderId,
           'Images': item['Images'],
           'Item Name': item['Item Name'],
           'Item Category': item['Item Category'],
           'Price': item['Price'],
           'quantity': item['Quantity'],
           'orderDate': Timestamp.now(),
-          'Status': 'doing',
+          'Status': 'Not Accepted',
           'Item Description': item['Item Description'],
           'Type': item['Type'],
-          'Consists Of': item['Consists Of'],
+          'Address': item['Address'],
+          'Email': item['Email']
+        });
+        await adminDocRef.add({
+          'OrderId': orderId,
+          'Images': item['Images'],
+          'Item Name': item['Item Name'],
+          'Item Category': item['Item Category'],
+          'Price': item['Price'],
+          'quantity': item['Quantity'],
+          'orderDate': Timestamp.now(),
+          'Status': 'Not Accepted',
+          'Item Description': item['Item Description'],
+          'Type': item['Type'],
+          'Address': item['Address'],
+          'Email': item['Email']
         });
       }
 

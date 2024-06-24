@@ -159,6 +159,7 @@ class _CartState extends State<Cart> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+    // ignore: unused_local_variable
     int n = 4;
     return Scaffold(
       backgroundColor: HexColor('#F5F6FB'),
@@ -602,7 +603,7 @@ class _CartState extends State<Cart> {
                                 },
                                 child: Container(
                                   width: 150,
-                                  height: 90,
+                                  height: 130,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
@@ -635,6 +636,7 @@ class _CartState extends State<Cart> {
                                   ),
                                 ),
                               ),
+                              Spacer(),
                               GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -646,7 +648,7 @@ class _CartState extends State<Cart> {
                                   padding: const EdgeInsets.only(left: 10.0),
                                   child: Container(
                                     width: 150,
-                                    height: 90,
+                                    height: 130,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(12),
                                       border: Border.all(

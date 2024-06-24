@@ -19,6 +19,7 @@ class _AdminOrdersState extends State<AdminOrders> {
   List<DocumentSnapshot> _orderList = [];
   List<DocumentSnapshot> _filteredOrderList = [];
   Map<String, String> _statusMap = {};
+  // ignore: unused_field
   String _searchQuery = '';
 
   @override
@@ -127,7 +128,14 @@ class _AdminOrdersState extends State<AdminOrders> {
                       DateFormat('dd-MM-yy \'at\' h:mm a').format(orderDate);
 
                   var itemId = item.id;
-                  var currentStatus = _statusMap[itemId];
+                  // ignore: unused_local_variable
+                  var currentStatus = _statusMap[itemId] == "Accepted"
+                      ? "Preparing"
+                      : _statusMap[itemId] == "Preparing"
+                          ? "Out For Delivery"
+                          : _statusMap[itemId] == "Out For Delivery"
+                              ? "Delivered"
+                              : _statusMap[itemId];
 
                   return Container(
                     margin:
@@ -172,10 +180,10 @@ class _AdminOrdersState extends State<AdminOrders> {
                                 color: Colors.black12,
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: item['ItemImage'] != null &&
-                                      item['ItemImage'].isNotEmpty
+                              child: item['Images'] != null &&
+                                      item['Images'].isNotEmpty
                                   ? CachedNetworkImage(
-                                      imageUrl: item['ItemImage'][0],
+                                      imageUrl: item['Images'][0],
                                       fit: BoxFit.cover,
                                       placeholder: (context, url) => Center(
                                         child: CircularProgressIndicator(),
@@ -186,7 +194,7 @@ class _AdminOrdersState extends State<AdminOrders> {
                                   : Icon(Icons.image_not_supported),
                             ),
                             Text(
-                              item['itemName'] ?? 'No Name',
+                              item['Item Name'] ?? 'No Name',
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
@@ -280,7 +288,7 @@ class _AdminOrdersState extends State<AdminOrders> {
                               Padding(
                                 padding: EdgeInsets.only(left: 10),
                                 child: Text(
-                                  item['itemName'] ?? 'No Name',
+                                  item['Item Name'] ?? 'No Name',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -311,7 +319,7 @@ class _AdminOrdersState extends State<AdminOrders> {
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8.0),
                                     child: Text(
-                                      "₹ ${item['price'] ?? 'N/A'}",
+                                      "₹ ${item['Price'] ?? 'N/A'}",
                                       style: const TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,

@@ -8,16 +8,18 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
-class UploadFood extends StatefulWidget {
-  const UploadFood({super.key});
+class EditFood extends StatefulWidget {
+  final DocumentSnapshot snapshot;
+  const EditFood({super.key, required this.snapshot});
 
   @override
-  State<UploadFood> createState() => _UploadFoodState();
+  State<EditFood> createState() => _EditFoodState();
 }
 
-class _UploadFoodState extends State<UploadFood> {
+class _EditFoodState extends State<EditFood> {
   List<XFile>? images = [];
   List<String> items = [];
+  int flag = 0;
   String? itemtype;
   String? useremail = FirebaseAuth.instance.currentUser?.email;
   TextEditingController search = TextEditingController();
@@ -32,6 +34,13 @@ class _UploadFoodState extends State<UploadFood> {
   @override
   void initState() {
     super.initState();
+    dropdownValue = widget.snapshot['Type'];
+    itemtype = widget.snapshot['Item Category'];
+    _itemname.text = widget.snapshot['Item Name'];
+    _price.text = widget.snapshot['Price'];
+    _consistsof.text = widget.snapshot['Consists Of'];
+    _itemdescription.text = widget.snapshot['Item Description'];
+
     create_list();
   }
 
@@ -153,7 +162,7 @@ class _UploadFoodState extends State<UploadFood> {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: -5,
-        title: Text("Upload Food",
+        title: Text("Edit Food Details",
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'Roboto',
@@ -177,7 +186,7 @@ class _UploadFoodState extends State<UploadFood> {
                 await FirebaseFirestore.instance
                     .collection('Menu')
                     .doc(_itemname.text)
-                    .set({
+                    .update({
                   'Item Name': _itemname.text,
                   'Item Category': itemtype,
                   'Price': _price.text,
@@ -281,30 +290,62 @@ class _UploadFoodState extends State<UploadFood> {
                                       ],
                                     ),
                                   )),
-                                  Positioned(
-                                      top: width * 0.35,
-                                      left: width * 0.33,
-                                      child: Column(
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              pickImages();
-                                            },
-                                            child: Image.asset(
-                                              'assets/images/Addphoto2.png',
-                                              width: width * 0.13,
-                                              height: width * 0.13,
+                                  flag == 0
+                                      ? Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.only(
+                                                top: width * 0.1),
+                                            child: Container(
+                                              width: width,
+                                              child: Image.network(
+                                                widget.snapshot['Images'][0],
+                                                loadingBuilder: (context, child,
+                                                    loadingProgress) {
+                                                  if (loadingProgress == null)
+                                                    return child;
+                                                  return Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      value: loadingProgress
+                                                                  .expectedTotalBytes !=
+                                                              null
+                                                          ? loadingProgress
+                                                                  .cumulativeBytesLoaded /
+                                                              loadingProgress
+                                                                  .expectedTotalBytes!
+                                                          : null,
+                                                    ),
+                                                  );
+                                                },
+                                                alignment: Alignment.center,
+                                              ),
                                             ),
                                           ),
-                                          Text(
-                                            "Click to Add Photo",
-                                            style: TextStyle(
-                                              fontSize: width * 0.03,
-                                              color: Colors.black38,
-                                            ),
-                                          ),
-                                        ],
-                                      )),
+                                        )
+                                      : Positioned(
+                                          top: width * 0.35,
+                                          left: width * 0.33,
+                                          child: Column(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  pickImages();
+                                                },
+                                                child: Image.asset(
+                                                  'assets/images/Addphoto2.png',
+                                                  width: width * 0.13,
+                                                  height: width * 0.13,
+                                                ),
+                                              ),
+                                              Text(
+                                                "Click to Add Photo",
+                                                style: TextStyle(
+                                                  fontSize: width * 0.03,
+                                                  color: Colors.black38,
+                                                ),
+                                              ),
+                                            ],
+                                          )),
                                   Positioned(
                                       bottom: width * 0.02,
                                       left: width * 0.02,
@@ -422,6 +463,7 @@ class _UploadFoodState extends State<UploadFood> {
                             right: width * 0.04, left: width * 0.04),
                         child: TextField(
                           controller: _itemname,
+                          enabled: false,
                           decoration: InputDecoration(
                             hintText: 'Enter the Item Name',
                             hintStyle: TextStyle(fontSize: 14.0),
