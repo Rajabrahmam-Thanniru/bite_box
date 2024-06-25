@@ -51,7 +51,9 @@ class Place_order {
           'Item Description': item['Item Description'],
           'Type': item['Type'],
           'Address': item['Address'],
-          'Email': item['Email']
+          'Email': item['Email'],
+          'Rating Given': false,
+          'Stars': 0,
         });
         await adminDocRef.add({
           'OrderId': orderId,

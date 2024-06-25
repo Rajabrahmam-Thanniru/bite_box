@@ -5,6 +5,7 @@ import 'package:bite_box/utils/push_to_wishlist.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -66,17 +67,41 @@ class _Item_detailsState extends State<Item_details> {
         widget.item['Item Name'].toString().replaceAll(' ', '').toLowerCase());
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+      ),
+      bottomNavigationBar: GestureDetector(
+        onTap: () async {
+          await pc.PushtoCart(context, [widget.item]);
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Cart()),
+          );
+        },
+        child: Container(
+          height: 70,
+          color: Colors.orangeAccent,
+          child: Center(
+            child: Text(
+              'Add To Cart',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             Align(
               alignment: Alignment.topRight,
               child: Padding(
-                padding: EdgeInsets.only(right: 10),
+                padding: EdgeInsets.only(right: 5),
                 child: Container(
-                  margin:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
                   width: 35,
                   height: 35,
                   decoration: BoxDecoration(
@@ -89,7 +114,7 @@ class _Item_detailsState extends State<Item_details> {
                         offset: const Offset(0, 1),
                       ),
                     ],
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(50),
                   ),
                   child: Center(
                     child: GestureDetector(
@@ -138,7 +163,8 @@ class _Item_detailsState extends State<Item_details> {
                 child: Container(
                   width: 120,
                   height: 140,
-                  margin: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(5),
+                  clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     color: Colors.black12,
                     borderRadius: BorderRadius.circular(10),
@@ -149,6 +175,8 @@ class _Item_detailsState extends State<Item_details> {
                       child: CircularProgressIndicator(),
                     ),
                     errorWidget: (context, url, error) => Icon(Icons.error),
+                    key: UniqueKey(),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
@@ -164,7 +192,7 @@ class _Item_detailsState extends State<Item_details> {
                         widget.item['Item Name'],
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 20,
+                          fontSize: 21,
                         ),
                       ),
                       Spacer(),
@@ -174,7 +202,7 @@ class _Item_detailsState extends State<Item_details> {
                           "₹${widget.item['Price']}",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                            fontSize: 21,
                           ),
                         ),
                       ),
@@ -194,19 +222,23 @@ class _Item_detailsState extends State<Item_details> {
                       ),
                     ],
                   ),
+                  Divider(
+                    color: Colors.black12,
+                    thickness: 0.5,
+                  ),
                   Padding(
-                    padding: EdgeInsets.only(top: 20),
+                    padding: EdgeInsets.only(top: 10, bottom: 15),
                     child: Row(
                       children: [
                         FaIcon(
                           FontAwesomeIcons.solidStar,
-                          size: 20,
+                          size: 18,
                           color: Colors.amber,
                         ),
                         Text(
-                          "4.5 (80 reviews)",
+                          "${widget.item['Total Rating']} (${widget.item['Rating Count']})",
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 16,
                           ),
                         ),
                         Spacer(),
@@ -216,11 +248,12 @@ class _Item_detailsState extends State<Item_details> {
                             children: [
                               FaIcon(
                                 FontAwesomeIcons.clock,
-                                size: 18,
+                                size: 16,
                               ),
                               Text(
                                 ' 10 min',
-                                style: TextStyle(fontSize: 18),
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -239,11 +272,11 @@ class _Item_detailsState extends State<Item_details> {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(top: 10, right: 15),
+                    padding: EdgeInsets.only(top: 10, right: 15, bottom: 10),
                     child: Text(
                       widget.item['Item Description'],
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 14,
                         color: Colors.black45,
                       ),
                       textAlign: TextAlign.justify,
@@ -254,49 +287,6 @@ class _Item_detailsState extends State<Item_details> {
                 ],
               ),
             ),
-            Align(
-              alignment: Alignment.center,
-              child: Padding(
-                padding: EdgeInsets.only(top: 20),
-                child: GestureDetector(
-                  onTap: () async {
-                    pc.PushtoCart(context, [widget.item]);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Cart()),
-                    );
-                  },
-                  child: Container(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    width: width * 0.87,
-                    height: 65,
-                    decoration: BoxDecoration(
-                      color: Colors.orangeAccent,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 0,
-                          blurRadius: 2,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Add To Cart',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            )
           ],
         ),
       ),

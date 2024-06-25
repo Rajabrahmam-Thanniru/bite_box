@@ -30,6 +30,8 @@ class Push_to_wishlist {
           'Type': item['Type'],
           'Item Description': item['Item Description'],
           'Consists Of': item['Consists Of'],
+          'Total Rating': item['Total Rating'],
+          'Rating Count': item['Rating Count'],
         });
       }
 

@@ -14,6 +14,7 @@ class Order_screen extends StatefulWidget {
 
 class _OrderState extends State<Order_screen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  double productRating = 0;
   List _orderList = [];
 
   @override
@@ -45,6 +46,7 @@ class _OrderState extends State<Order_screen> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: RefreshIndicator(
@@ -77,7 +79,7 @@ class _OrderState extends State<Order_screen> {
                     margin:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     width: width * 0.9,
-                    height: 250,
+                    height: 260,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
@@ -291,27 +293,122 @@ class _OrderState extends State<Order_screen> {
                                   fontSize: 16,
                                 ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                child: RatingBar(
-                                  initialRating: 3.5,
-                                  direction: Axis.horizontal,
-                                  allowHalfRating: true,
-                                  itemCount: 5,
-                                  ratingWidget: RatingWidget(
-                                    full: Icon(Icons.star, color: Colors.amber),
-                                    half: Icon(Icons.star_half_outlined,
-                                        color: Colors.amber),
-                                    empty: Icon(Icons.star_border_outlined,
-                                        color: Colors.grey),
-                                  ),
-                                  itemSize: 18,
-                                  ignoreGestures: true,
-                                  onRatingUpdate: (rating) {
-                                    print(rating);
-                                  },
-                                ),
-                              ),
+                              item['Rating Given']
+                                  ? Row(
+                                      children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(left: 8.0),
+                                          child: RatingBar(
+                                            initialRating: item['Stars'],
+                                            direction: Axis.horizontal,
+                                            allowHalfRating: true,
+                                            itemCount: 5,
+                                            ratingWidget: RatingWidget(
+                                              full: Icon(Icons.star,
+                                                  color: Colors.amber),
+                                              half: Icon(
+                                                  Icons.star_half_outlined,
+                                                  color: Colors.amber),
+                                              empty: Icon(
+                                                  Icons.star_border_outlined,
+                                                  color: Colors.grey),
+                                            ),
+                                            itemSize: 18,
+                                            ignoreGestures: true,
+                                            onRatingUpdate: (rating) {
+                                              print(rating);
+                                            },
+                                          ),
+                                        ),
+                                        Padding(
+                                            padding: EdgeInsets.only(left: 8),
+                                            child: Text("(${item['Stars']})"))
+                                      ],
+                                    )
+                                  : Padding(
+                                      padding: const EdgeInsets.only(left: 8.0),
+                                      child: Row(
+                                        children: [
+                                          RatingBar(
+                                            initialRating: 0,
+                                            direction: Axis.horizontal,
+                                            allowHalfRating: true,
+                                            itemCount: 5,
+                                            ratingWidget: RatingWidget(
+                                              full: Icon(Icons.star,
+                                                  color: Colors.amber),
+                                              half: Icon(
+                                                  Icons.star_half_outlined,
+                                                  color: Colors.amber),
+                                              empty: Icon(
+                                                  Icons.star_border_outlined,
+                                                  color: Colors.grey),
+                                            ),
+                                            itemSize: 18,
+                                            onRatingUpdate: (rating) {
+                                              setState(() {
+                                                productRating = rating;
+                                              });
+                                            },
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 30.0, right: 8),
+                                            child: GestureDetector(
+                                              onTap: () async {
+                                                final FirebaseAuth _auth =
+                                                    FirebaseAuth.instance;
+
+                                                User? user = _auth.currentUser;
+                                                if (productRating != 0) {
+                                                  await _firestore
+                                                      .collection('Users')
+                                                      .doc(user?.email)
+                                                      .collection('orders')
+                                                      .doc(item.id)
+                                                      .update({
+                                                    'Rating Given': true,
+                                                    'Stars': productRating,
+                                                  });
+                                                  await _firestore
+                                                      .collection('Menu')
+                                                      .doc(item['Item Name'])
+                                                      .update({
+                                                    'Total Rating':
+                                                        FieldValue.increment(
+                                                            productRating),
+                                                    'Rating Count':
+                                                        FieldValue.increment(1),
+                                                  });
+                                                  await getOrders();
+                                                } else {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                          'Please rate the product'),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              child: Container(
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Text('Submit'),
+                                                ),
+                                                decoration: BoxDecoration(
+                                                    color: Colors.amber,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            5)),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                             ],
                           ),
                         ),

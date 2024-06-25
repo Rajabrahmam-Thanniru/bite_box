@@ -186,6 +186,8 @@ class _UploadFoodState extends State<UploadFood> {
                   'Type': dropdownValue,
                   'Images': downloadurls,
                   'User Email': useremail,
+                  'Total Rating': 0,
+                  'Rating Count': 0,
                 }).then((value) {
                   _showDocumentIdPopup2(
                       "Item Added Successfully", 'Upload Successful');
