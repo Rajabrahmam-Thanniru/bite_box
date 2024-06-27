@@ -9,6 +9,7 @@ import 'package:bite_box/utils/Notifications.dart';
 import 'package:bite_box/utils/cart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -28,6 +29,8 @@ class _User_homeState extends State<User_home> {
   @override
   void initState() {
     super.initState();
+    updateToken();
+    getnotificationpermission();
     setState(() {
       _selectedIndex = widget.initialSelectedIndex;
     });
@@ -42,6 +45,44 @@ class _User_homeState extends State<User_home> {
 
   void _onItemTapped(int index) {
     _pageController.jumpToPage(index);
+  }
+
+  Future<void> getnotificationpermission() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    NotificationSettings settings = await messaging.requestPermission(
+      alert: true,
+      announcement: true,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+  }
+
+  Future<void> updateToken() async {
+    var fcmToken = await FirebaseMessaging.instance.getToken();
+    var user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      final email = user.email;
+      var token = await FirebaseFirestore.instance
+          .collection('fcmTokens')
+          .doc(email)
+          .get();
+
+      if (token.exists) {
+        await FirebaseFirestore.instance
+            .collection('fcmTokens')
+            .doc(email)
+            .update({'token': fcmToken});
+      } else {
+        await FirebaseFirestore.instance
+            .collection('fcmTokens')
+            .doc(email)
+            .set({'token': fcmToken});
+      }
+    }
   }
 
   @override

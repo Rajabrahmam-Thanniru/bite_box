@@ -20,7 +20,7 @@ class _RazorPaymentState extends State<RazorPayment> {
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
     options = {
-      'key': 'rzp_live_Yks1y6vQ4yFdnu',
+      'key': 'rzp_test_Tk2oWMF0oHvPl3',
       'amount': widget.total * 100,
       'name': 'Bite Box',
       'description': 'This is payment for your order.',
@@ -38,7 +38,6 @@ class _RazorPaymentState extends State<RazorPayment> {
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
     Navigator.pop(context, {
       "status": "success",
-      "orderId": response.paymentId,
     });
     print("Payment has been successfull");
     print(response.orderId);

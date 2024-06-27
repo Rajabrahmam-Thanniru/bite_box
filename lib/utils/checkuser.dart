@@ -21,7 +21,6 @@ class _CheckUserState extends State<CheckUser> {
 
   void checkUserType() async {
     final user = FirebaseAuth.instance.currentUser;
-
     if (user != null) {
       if (user.email == "biteboxcanteen@gmail.com") {
         Navigator.pushReplacement(

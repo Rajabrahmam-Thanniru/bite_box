@@ -33,7 +33,7 @@ class _OrderState extends State<Order_screen> {
           .collection('Users')
           .doc(user?.email)
           .collection('orders')
-          .orderBy('orderDate')
+          .orderBy('orderDate', descending: true)
           .get();
       setState(() {
         _orderList = data.docs;

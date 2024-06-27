@@ -2,7 +2,6 @@ import 'dart:math';
 import 'package:bite_box/screens/user/show_item_details.dart';
 import 'package:bite_box/utils/Search_something.dart';
 import 'package:bite_box/utils/cart.dart';
-import 'package:bite_box/utils/place_order.dart';
 import 'package:bite_box/utils/push_to_cart.dart';
 import 'package:bite_box/utils/push_to_wishlist.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -13,7 +12,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Search extends StatefulWidget {
-  const Search({super.key});
+  const Search({Key? key}) : super(key: key);
 
   @override
   State<Search> createState() => _SearchState();
@@ -34,8 +33,16 @@ class _SearchState extends State<Search> {
   @override
   void initState() {
     super.initState();
-    getMenu();
-    getsearchhistory();
+    getMenu().listen((menu) {
+      setState(() {
+        _allMenu = menu;
+      });
+    });
+    getSearchHistory().listen((history) {
+      setState(() {
+        _recentSearches = history;
+      });
+    });
   }
 
   Stream<List<DocumentSnapshot>> getMenu() {
@@ -47,13 +54,14 @@ class _SearchState extends State<Search> {
         .map((snapshot) => snapshot.docs);
   }
 
-  Stream<List<DocumentSnapshot>> getsearchhistory() {
+  Stream<List<DocumentSnapshot>> getSearchHistory() {
     final FirebaseAuth _auth = FirebaseAuth.instance;
     User? user = _auth.currentUser;
     return _firestore
         .collection('Users')
         .doc(user?.email)
         .collection('Search History')
+        .orderBy('Date', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs);
   }
@@ -88,127 +96,114 @@ class _SearchState extends State<Search> {
       backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
       body: Column(
         children: [
-          Container(
-            width: width,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: CupertinoSearchTextField(
-                  focusNode: _searchFocusNode,
-                  placeholder: 'Search',
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        spreadRadius: 1,
-                        blurRadius: 2,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  onChanged: (value) {
-                    _search(value);
-                  },
-                  onSubmitted: (value) {
-                    final FirebaseAuth _auth = FirebaseAuth.instance;
-                    User? user = _auth.currentUser;
-                    _firestore
-                        .collection('Users')
-                        .doc(user?.email)
-                        .collection('Search History')
-                        .add({
-                      'Search': value,
-                      'Date': Timestamp.now(),
-                    });
-                  },
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: CupertinoSearchTextField(
+                focusNode: _searchFocusNode,
+                placeholder: 'Search',
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      spreadRadius: 1,
+                      blurRadius: 2,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                onChanged: (value) async {
+                  await _search(value);
+                },
+                onSubmitted: (value) {
+                  final FirebaseAuth _auth = FirebaseAuth.instance;
+                  User? user = _auth.currentUser;
+                  _firestore
+                      .collection('Users')
+                      .doc(user?.email)
+                      .collection('Search History')
+                      .add({
+                    'Search': value,
+                    'Date': Timestamp.now(),
+                  });
+                },
               ),
             ),
           ),
           _searchResults.isEmpty
               ? Expanded(
-                  child: StreamBuilder(
-                    stream: getsearchhistory() as Stream,
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) {
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      _recentSearches = snapshot.data ?? [];
-                      return ListView.builder(
-                        itemCount: min(4, recentLength),
-                        itemBuilder: (context, index) {
-                          var item = _recentSearches[index];
-                          return GestureDetector(
-                            onTap: () {
-                              _search(item['Search']);
-                            },
-                            child: Column(
-                              children: [
-                                Container(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 5),
-                                  width: width * 0.9,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.history),
-                                        const SizedBox(width: 10),
-                                        Text(
-                                          item['Search'] ?? 'No Name',
-                                          style: const TextStyle(
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Spacer(),
-                                        GestureDetector(
-                                            onTap: () async {
-                                              final FirebaseAuth _auth =
-                                                  FirebaseAuth.instance;
-                                              User? user = _auth.currentUser;
-                                              await _firestore
-                                                  .collection('Users')
-                                                  .doc(user?.email)
-                                                  .collection('Search History')
-                                                  .doc(item.id)
-                                                  .delete();
-                                              getsearchhistory();
-                                            },
-                                            child: Icon(Icons.close)),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                Divider(
-                                  height: 0.5,
-                                  thickness: 0.5,
-                                  color: Colors.black12,
-                                )
-                              ],
-                            ),
-                          );
+                  child: ListView.builder(
+                    itemCount: min(4, _recentSearches.length),
+                    itemBuilder: (context, index) {
+                      var item1 = _recentSearches[index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          _search(item1['Search']);
                         },
+                        child: Column(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              width: width * 0.9,
+                              child: Padding(
+                                padding: const EdgeInsets.all(10),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.history),
+                                    const SizedBox(width: 10),
+                                    Text(
+                                      item1['Search'] ?? 'No Name',
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                    GestureDetector(
+                                        onTap: () async {
+                                          final FirebaseAuth _auth =
+                                              FirebaseAuth.instance;
+                                          User? user = _auth.currentUser;
+                                          await _firestore
+                                              .collection('Users')
+                                              .doc(user?.email)
+                                              .collection('Search History')
+                                              .doc(item1.id)
+                                              .delete();
+                                          getSearchHistory();
+                                        },
+                                        child: Icon(Icons.close)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Divider(
+                              height: 0.5,
+                              thickness: 0.5,
+                              color: Colors.black12,
+                            )
+                          ],
+                        ),
                       );
                     },
                   ),
                 )
               : Expanded(
-                  child: StreamBuilder(
-                    stream: getMenu() as Stream,
+                  child: StreamBuilder<List<DocumentSnapshot>>(
+                    stream: getMenu(),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) {
                         return Center(
                           child: CircularProgressIndicator(),
                         );
                       }
-                      _allMenu = snapshot.data ?? [];
+                      _allMenu = snapshot.data!;
                       return ListView.builder(
                         itemCount: searchLength != 0
                             ? min(3, searchLength)
@@ -408,19 +403,19 @@ class _SearchState extends State<Search> {
     );
   }
 
-  void _search(String value) {
+  Future<void> _search(String value) async {
     _searchResults.clear();
-    _recentSearches.clear();
     if (value.isNotEmpty) {
-      for (var i = 0; i < _allMenu.length; i++) {
-        if (_allMenu[i]['Item Name']
+      for (var item in _allMenu) {
+        if (item['Item Name']
             .toString()
             .toLowerCase()
             .contains(value.toLowerCase())) {
-          _searchResults.add(_allMenu[i]);
-          _recentSearches.add(_allMenu[i]);
+          _searchResults.add(item);
         }
       }
+    } else {
+      await getSearchHistory();
     }
     setState(() {});
   }

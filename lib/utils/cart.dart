@@ -26,6 +26,7 @@ class _CartState extends State<Cart> {
   TextEditingController note = TextEditingController();
   String selectedAddress = "";
   late int s = 0;
+  bool loading = false;
 
   @override
   void initState() {
@@ -77,6 +78,9 @@ class _CartState extends State<Cart> {
   }
 
   void _proceedToCheckout() async {
+    setState(() {
+      loading = true;
+    });
     if (_cartList.isEmpty || _quantities.isEmpty) {
       print('Cart is empty or quantities are not initialized properly.');
       return;
@@ -107,6 +111,9 @@ class _CartState extends State<Cart> {
       await placeOrder.PlaceOrder(context, orderData);
 
       await _clearCart();
+      setState(() {
+        loading = false;
+      });
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -163,101 +170,106 @@ class _CartState extends State<Cart> {
     int n = 4;
     return Scaffold(
       backgroundColor: HexColor('#F5F6FB'),
-      bottomNavigationBar: (_cartList.length == 0)
+      bottomNavigationBar: loading
           ? Container(
               height: 100,
             )
-          : Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.5),
-                    spreadRadius: 2,
-                    blurRadius: 5,
-                    offset: Offset(0, 3),
+          : (_cartList.length == 0)
+              ? Container(
+                  height: 100,
+                )
+              : Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              height: 90,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Spacer(),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: Container(
-                          width: width * 0.55,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 255, 174, 0),
-                            borderRadius: BorderRadius.circular(7),
-                          ),
-                          child: GestureDetector(
-                            onTap: () {
-                              _proceedToCheckout();
-                            },
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                  height: 90,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Spacer(),
+                      Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: Container(
+                              width: width * 0.55,
+                              height: 70,
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(255, 255, 174, 0),
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  _proceedToCheckout();
+                                },
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 10),
+                                          child: Text(
+                                            '₹$_totalPrice',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 10),
+                                          child: Text(
+                                            'TOTAL',
+                                            style: TextStyle(
+                                              color: Color.fromARGB(
+                                                  255, 255, 255, 255),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w100,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Spacer(),
                                     Padding(
-                                      padding: EdgeInsets.only(left: 10),
+                                      padding: const EdgeInsets.all(8.0),
                                       child: Text(
-                                        '₹$_totalPrice',
+                                        'Place order',
                                         style: TextStyle(
                                           color: Colors.white,
-                                          fontSize: 18,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                     ),
                                     Padding(
-                                      padding: EdgeInsets.only(left: 10),
-                                      child: Text(
-                                        'TOTAL',
-                                        style: TextStyle(
-                                          color: Color.fromARGB(
-                                              255, 255, 255, 255),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w100,
-                                        ),
+                                      padding: EdgeInsets.only(right: 10),
+                                      child: Icon(
+                                        Icons.arrow_forward_ios,
+                                        size: 16,
+                                        color: Colors.white,
                                       ),
-                                    ),
+                                    )
                                   ],
                                 ),
-                                Spacer(),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Text(
-                                    'Place order',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(right: 10),
-                                  child: Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
-                      )),
-                ],
-              ),
-            ),
+                          )),
+                    ],
+                  ),
+                ),
       appBar: AppBar(
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
@@ -304,426 +316,447 @@ class _CartState extends State<Cart> {
           Spacer(),
         ],
       ),
-      body: (_cartList.length == 0)
+      body: loading
           ? Center(
-              child: Text(
-                'No Items In The Cart',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
-              ),
+              child: CircularProgressIndicator(),
             )
-          : SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(top: 8.0, left: 10, right: 10),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: _cartList.length,
-                            itemBuilder: (context, index) {
-                              var item = _cartList[index];
-                              int price = item['Price'] is int
-                                  ? item['Price']
-                                  : int.parse(item['Price']);
-                              int quantity = _quantities[index] ?? 1;
+          : (_cartList.length == 0)
+              ? Center(
+                  child: Text(
+                    'No Items In The Cart',
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            top: 8.0, left: 10, right: 10),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: _cartList.length,
+                                itemBuilder: (context, index) {
+                                  var item = _cartList[index];
+                                  int price = item['Price'] is int
+                                      ? item['Price']
+                                      : int.parse(item['Price']);
+                                  int quantity = _quantities[index] ?? 1;
 
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          width: 25,
-                                          height: 25,
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(2),
-                                            border: Border.all(
-                                                color: (item['Type']
-                                                            .toString()
-                                                            .replaceAll(' ', '')
-                                                            .toLowerCase() ==
-                                                        'non-veg')
-                                                    ? Colors.red
-                                                    : Colors.green),
-                                          ),
-                                          child: Center(
-                                            child: FaIcon(
-                                              FontAwesomeIcons.solidCircle,
-                                              size: 10,
-                                              color: (item['Type']
-                                                          .toString()
-                                                          .replaceAll(' ', '')
-                                                          .toLowerCase() ==
-                                                      'non-veg')
-                                                  ? Colors.red
-                                                  : Colors.green,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 10),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                item['Item Name'] ?? 'No Name',
-                                                style: const TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                              Text(item['Type']),
-                                              SizedBox(height: 5),
-                                              Text(
-                                                "₹${item['Price'] ?? 'N/A'}",
-                                                style: const TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.normal,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        SizedBox(width: 10),
-                                        Column(
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Container(
-                                              width: 90,
-                                              height: 35,
+                                              width: 25,
+                                              height: 25,
                                               decoration: BoxDecoration(
-                                                color: Color.fromARGB(
-                                                    25, 255, 193, 7),
                                                 borderRadius:
-                                                    BorderRadius.circular(12),
+                                                    BorderRadius.circular(2),
                                                 border: Border.all(
-                                                    color: Colors.orangeAccent),
+                                                    color: (item['Type']
+                                                                .toString()
+                                                                .replaceAll(
+                                                                    ' ', '')
+                                                                .toLowerCase() ==
+                                                            'non-veg')
+                                                        ? Colors.red
+                                                        : Colors.green),
                                               ),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceEvenly,
+                                              child: Center(
+                                                child: FaIcon(
+                                                  FontAwesomeIcons.solidCircle,
+                                                  size: 10,
+                                                  color: (item['Type']
+                                                              .toString()
+                                                              .replaceAll(
+                                                                  ' ', '')
+                                                              .toLowerCase() ==
+                                                          'non-veg')
+                                                      ? Colors.red
+                                                      : Colors.green,
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 10),
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        if (quantity > 1) {
-                                                          _quantities[index] =
-                                                              quantity - 1;
-                                                          _calculateBasePrice();
-                                                        } else {
-                                                          _firestore
-                                                              .collection(
-                                                                  'Users')
-                                                              .doc(FirebaseAuth
-                                                                  .instance
-                                                                  .currentUser!
-                                                                  .email)
-                                                              .collection(
-                                                                  'Cart')
-                                                              .doc(item.id)
-                                                              .delete();
-                                                          getCartItems();
-                                                          _quantities[index] =
-                                                              0;
-                                                          _calculateBasePrice();
-                                                        }
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      width: 30,
-                                                      height: 30,
-                                                      decoration:
-                                                          BoxDecoration(),
-                                                      child: Center(
-                                                        child: Icon(
-                                                          Icons.remove,
-                                                          color: Colors
-                                                              .orangeAccent,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
                                                   Text(
-                                                    "$quantity",
-                                                    style: TextStyle(
-                                                      fontSize: quantity
-                                                                  .toString()
-                                                                  .length <=
-                                                              2
-                                                          ? 18
-                                                          : 16,
-                                                      color:
-                                                          Colors.orangeAccent,
+                                                    item['Item Name'] ??
+                                                        'No Name',
+                                                    style: const TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.bold,
                                                     ),
                                                   ),
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        _quantities[index] =
-                                                            quantity + 1;
-                                                        _calculateBasePrice();
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      width: 30,
-                                                      height: 30,
-                                                      decoration:
-                                                          BoxDecoration(),
-                                                      child: Center(
-                                                        child: Icon(
-                                                          Icons.add,
-                                                          color: Colors
-                                                              .orangeAccent,
-                                                        ),
-                                                      ),
+                                                  Text(item['Type']),
+                                                  SizedBox(height: 5),
+                                                  Text(
+                                                    "₹${item['Price'] ?? 'N/A'}",
+                                                    style: const TextStyle(
+                                                      fontSize: 15,
+                                                      fontWeight:
+                                                          FontWeight.normal,
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             ),
+                                            SizedBox(width: 10),
+                                            Column(
+                                              children: [
+                                                Container(
+                                                  width: 90,
+                                                  height: 35,
+                                                  decoration: BoxDecoration(
+                                                    color: Color.fromARGB(
+                                                        25, 255, 193, 7),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12),
+                                                    border: Border.all(
+                                                        color: Colors
+                                                            .orangeAccent),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceEvenly,
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          setState(() {
+                                                            if (quantity > 1) {
+                                                              _quantities[
+                                                                      index] =
+                                                                  quantity - 1;
+                                                              _calculateBasePrice();
+                                                            } else {
+                                                              _firestore
+                                                                  .collection(
+                                                                      'Users')
+                                                                  .doc(FirebaseAuth
+                                                                      .instance
+                                                                      .currentUser!
+                                                                      .email)
+                                                                  .collection(
+                                                                      'Cart')
+                                                                  .doc(item.id)
+                                                                  .delete();
+                                                              getCartItems();
+                                                              _quantities[
+                                                                  index] = 0;
+                                                              _calculateBasePrice();
+                                                            }
+                                                          });
+                                                        },
+                                                        child: Container(
+                                                          width: 30,
+                                                          height: 30,
+                                                          decoration:
+                                                              BoxDecoration(),
+                                                          child: Center(
+                                                            child: Icon(
+                                                              Icons.remove,
+                                                              color: Colors
+                                                                  .orangeAccent,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        "$quantity",
+                                                        style: TextStyle(
+                                                          fontSize: quantity
+                                                                      .toString()
+                                                                      .length <=
+                                                                  2
+                                                              ? 18
+                                                              : 16,
+                                                          color: Colors
+                                                              .orangeAccent,
+                                                        ),
+                                                      ),
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          setState(() {
+                                                            _quantities[index] =
+                                                                quantity + 1;
+                                                            _calculateBasePrice();
+                                                          });
+                                                        },
+                                                        child: Container(
+                                                          width: 30,
+                                                          height: 30,
+                                                          decoration:
+                                                              BoxDecoration(),
+                                                          child: Center(
+                                                            child: Icon(
+                                                              Icons.add,
+                                                              color: Colors
+                                                                  .orangeAccent,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SizedBox(height: 5),
+                                                Text(
+                                                  "₹${price * quantity}",
+                                                  style: const TextStyle(
+                                                    fontSize: 15,
+                                                    fontWeight:
+                                                        FontWeight.normal,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: _showAddressSelectionBottomSheet,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Row(
+                                    children: <Widget>[
+                                      Icon(
+                                        Icons.location_on,
+                                        color: Colors.amber[500],
+                                      ),
+                                      SizedBox(width: 10),
+                                      Text(
+                                        'Deliver to:',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      SizedBox(width: 5),
+                                      Text(
+                                        selectedAddress.isEmpty
+                                            ? 'Select your address'
+                                            : selectedAddress,
+                                        style: TextStyle(
+                                          color: selectedAddress.isEmpty
+                                              ? Colors.grey[600]
+                                              : Colors.black,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Icon(Icons.arrow_drop_down),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 0,
+                              blurRadius: 2,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Visibility(
+                              visible: s == 1,
+                              child: Row(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        tapVal = 0;
+                                        _totalPrice = _basePrice;
+                                      });
+                                    },
+                                    child: Container(
+                                      width: 150,
+                                      height: 130,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                            color: (tapVal == 0)
+                                                ? Colors.orangeAccent
+                                                : Colors.grey),
+                                      ),
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Standard',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                              ),
+                                            ),
                                             SizedBox(height: 5),
                                             Text(
-                                              "₹${price * quantity}",
-                                              style: const TextStyle(
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.normal,
+                                              'Your usual preparation time',
+                                              style: TextStyle(
+                                                color: Colors.grey,
                                               ),
                                             ),
                                           ],
                                         ),
-                                      ],
+                                      ),
                                     ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: _showAddressSelectionBottomSheet,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Row(
-                                children: <Widget>[
-                                  Icon(
-                                    Icons.location_on,
-                                    color: Colors.amber[500],
-                                  ),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Deliver to:',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    selectedAddress.isEmpty
-                                        ? 'Select your address'
-                                        : selectedAddress,
-                                    style: TextStyle(
-                                      color: selectedAddress.isEmpty
-                                          ? Colors.grey[600]
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Icon(Icons.arrow_drop_down),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 10),
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 0,
-                          blurRadius: 2,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Visibility(
-                          visible: s == 1,
-                          child: Row(
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    tapVal = 0;
-                                    _totalPrice = _basePrice;
-                                  });
-                                },
-                                child: Container(
-                                  width: 150,
-                                  height: 130,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                        color: (tapVal == 0)
-                                            ? Colors.orangeAccent
-                                            : Colors.grey),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Standard',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        SizedBox(height: 5),
-                                        Text(
-                                          'Your usual preparation time',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Spacer(),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    tapVal = 1;
-                                    _totalPrice = _basePrice + deliveryCharge;
-                                  });
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.only(left: 10.0),
-                                  child: Container(
-                                    width: 150,
-                                    height: 130,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(
-                                          color: (tapVal == 1)
-                                              ? Colors.orangeAccent
-                                              : Colors.grey),
-                                    ),
+                                  Spacer(),
+                                  GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        tapVal = 1;
+                                        _totalPrice =
+                                            _basePrice + deliveryCharge;
+                                      });
+                                    },
                                     child: Padding(
-                                      padding: const EdgeInsets.all(10.0),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
+                                      padding:
+                                          const EdgeInsets.only(left: 10.0),
+                                      child: Container(
+                                        width: 150,
+                                        height: 130,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          border: Border.all(
+                                              color: (tapVal == 1)
+                                                  ? Colors.orangeAccent
+                                                  : Colors.grey),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(10.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Text(
-                                                'Delivery',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 15,
-                                                ),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    'Delivery',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                  Spacer(),
+                                                  Text(
+                                                    '₹ $deliveryCharge ',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 15,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                              Spacer(),
+                                              SizedBox(height: 5),
                                               Text(
-                                                '₹ $deliveryCharge ',
+                                                'We will deliver the item to your location ',
                                                 style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 15,
+                                                  color: Colors.grey,
                                                 ),
                                               ),
                                             ],
                                           ),
-                                          SizedBox(height: 5),
-                                          Text(
-                                            'We will deliver the item to your location ',
-                                            style: TextStyle(
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.orangeAccent),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Add a note to canteen',
-                              prefixIcon: Padding(
-                                padding: EdgeInsets.only(left: 5, right: 10),
-                                child: Icon(Icons.content_paste_rounded),
-                              ),
-                              border: InputBorder.none,
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 15),
                             ),
-                            controller: note,
-                            maxLines: 3,
-                          ),
+                            SizedBox(height: 10),
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.orangeAccent),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: TextField(
+                                decoration: InputDecoration(
+                                  hintText: 'Add a note to canteen',
+                                  prefixIcon: Padding(
+                                    padding:
+                                        EdgeInsets.only(left: 5, right: 10),
+                                    child: Icon(Icons.content_paste_rounded),
+                                  ),
+                                  border: InputBorder.none,
+                                  contentPadding:
+                                      EdgeInsets.symmetric(horizontal: 15),
+                                ),
+                                controller: note,
+                                maxLines: 3,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
     );
   }
 

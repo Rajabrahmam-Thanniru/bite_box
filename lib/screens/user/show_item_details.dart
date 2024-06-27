@@ -236,7 +236,7 @@ class _Item_detailsState extends State<Item_details> {
                           color: Colors.amber,
                         ),
                         Text(
-                          "${widget.item['Total Rating']} (${widget.item['Rating Count']})",
+                          "${widget.item['Total Rating'] / widget.item['Rating Count']} (${widget.item['Rating Count']})",
                           style: TextStyle(
                             fontSize: 16,
                           ),
