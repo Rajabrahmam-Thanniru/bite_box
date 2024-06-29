@@ -6,10 +6,7 @@ class Push_to_wishlist {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<void> Pushtowishlist(
-    BuildContext context,
-    List order,
-  ) async {
+  Future<void> Pushtowishlist(BuildContext context, List order) async {
     try {
       // Get the currently authenticated user
       User? user = _auth.currentUser;
@@ -19,10 +16,11 @@ class Push_to_wishlist {
 
       DocumentReference userDocRef =
           _firestore.collection('Users').doc(user.email);
-      CollectionReference ordersCollection = userDocRef.collection('wishList');
+      CollectionReference wishlistCollection =
+          userDocRef.collection('wishList');
 
       for (var item in order) {
-        await ordersCollection.add({
+        await wishlistCollection.add({
           'Images': item['Images'],
           'Item Name': item['Item Name'],
           'Item Category': item['Item Category'],
@@ -36,35 +34,45 @@ class Push_to_wishlist {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(order.length.toString())),
+        SnackBar(content: Text('Added to wish list: ' + order[0]['Item Name'])),
       );
     } catch (e) {
-      print("Error placing order: $e");
+      print("Error adding to wishlist: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error placing order: $e')),
+        SnackBar(content: Text('Error adding to wishlist: $e')),
       );
     }
   }
 
   Future<void> delete_item_wishlist(
-    BuildContext context,
-    String item,
-  ) async {
-    User? user = _auth.currentUser;
-    if (user == null) {
-      throw Exception("User is not authenticated");
-    }
-    DocumentReference userDocRef =
-        _firestore.collection('Users').doc(user.email);
-    CollectionReference cartCollection = userDocRef.collection('wishList');
+      BuildContext context, String itemName) async {
+    try {
+      User? user = _auth.currentUser;
+      if (user == null) {
+        throw Exception("User is not authenticated");
+      }
 
-    QuerySnapshot<Object?> cartItems = await cartCollection.get();
+      DocumentReference userDocRef =
+          _firestore.collection('Users').doc(user.email);
+      CollectionReference wishlistCollection =
+          userDocRef.collection('wishList');
 
-    for (var doc in cartItems.docs) {
-      if (doc['Item Name'].toString().replaceAll(' ', '').toLowerCase() ==
-          item.replaceAll(' ', '').toLowerCase()) {
+      QuerySnapshot querySnapshot = await wishlistCollection
+          .where('Item Name', isEqualTo: itemName)
+          .get();
+
+      for (var doc in querySnapshot.docs) {
         await doc.reference.delete();
       }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Removed from wish list: ' + itemName)),
+      );
+    } catch (e) {
+      print("Error removing from wishlist: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error removing from wishlist: $e')),
+      );
     }
   }
 }

@@ -1,10 +1,10 @@
+import 'package:flutter/material.dart';
+import 'package:bite_box/screens/user/review.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class Order_screen extends StatefulWidget {
   const Order_screen({super.key});
@@ -252,163 +252,21 @@ class _OrderState extends State<Order_screen> {
                                 ),
                               ),
                               Spacer(),
-                              Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 8.0),
-                                    child: Text(
-                                      "₹ ${item['Price'] ?? 'N/A'}",
-                                      style: const TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.only(left: 3, right: 10),
-                                    child: FaIcon(
-                                      FontAwesomeIcons.chevronRight,
-                                      size: 10,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ],
+                              ElevatedButton(
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    isScrollControlled: true,
+                                    builder: (context) {
+                                      return ReviewItem(
+                                        item: item['Item Name'] ?? 'No Name',
+                                        orderId: item['OrderId'],
+                                      );
+                                    },
+                                  );
+                                },
+                                child: Text('Write Review'),
                               ),
-                            ],
-                          ),
-                        ),
-                        Divider(
-                          color: Colors.black12,
-                          thickness: 0.4,
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 10),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Rate',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              item['Rating Given']
-                                  ? Row(
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(left: 8.0),
-                                          child: RatingBar(
-                                            initialRating: item['Stars'],
-                                            direction: Axis.horizontal,
-                                            allowHalfRating: true,
-                                            itemCount: 5,
-                                            ratingWidget: RatingWidget(
-                                              full: Icon(Icons.star,
-                                                  color: Colors.amber),
-                                              half: Icon(
-                                                  Icons.star_half_outlined,
-                                                  color: Colors.amber),
-                                              empty: Icon(
-                                                  Icons.star_border_outlined,
-                                                  color: Colors.grey),
-                                            ),
-                                            itemSize: 18,
-                                            ignoreGestures: true,
-                                            onRatingUpdate: (rating) {
-                                              print(rating);
-                                            },
-                                          ),
-                                        ),
-                                        Padding(
-                                            padding: EdgeInsets.only(left: 8),
-                                            child: Text("(${item['Stars']})"))
-                                      ],
-                                    )
-                                  : Padding(
-                                      padding: const EdgeInsets.only(left: 8.0),
-                                      child: Row(
-                                        children: [
-                                          RatingBar(
-                                            initialRating: 0,
-                                            direction: Axis.horizontal,
-                                            allowHalfRating: true,
-                                            itemCount: 5,
-                                            ratingWidget: RatingWidget(
-                                              full: Icon(Icons.star,
-                                                  color: Colors.amber),
-                                              half: Icon(
-                                                  Icons.star_half_outlined,
-                                                  color: Colors.amber),
-                                              empty: Icon(
-                                                  Icons.star_border_outlined,
-                                                  color: Colors.grey),
-                                            ),
-                                            itemSize: 18,
-                                            onRatingUpdate: (rating) {
-                                              setState(() {
-                                                productRating = rating;
-                                              });
-                                            },
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                left: 30.0, right: 8),
-                                            child: GestureDetector(
-                                              onTap: () async {
-                                                final FirebaseAuth _auth =
-                                                    FirebaseAuth.instance;
-
-                                                User? user = _auth.currentUser;
-                                                if (productRating != 0) {
-                                                  await _firestore
-                                                      .collection('Users')
-                                                      .doc(user?.email)
-                                                      .collection('orders')
-                                                      .doc(item.id)
-                                                      .update({
-                                                    'Rating Given': true,
-                                                    'Stars': productRating,
-                                                  });
-                                                  await _firestore
-                                                      .collection('Menu')
-                                                      .doc(item['Item Name'])
-                                                      .update({
-                                                    'Total Rating':
-                                                        FieldValue.increment(
-                                                            productRating),
-                                                    'Rating Count':
-                                                        FieldValue.increment(1),
-                                                  });
-                                                  await getOrders();
-                                                } else {
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                          'Please rate the product'),
-                                                    ),
-                                                  );
-                                                }
-                                              },
-                                              child: Container(
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(8.0),
-                                                  child: Text('Submit'),
-                                                ),
-                                                decoration: BoxDecoration(
-                                                    color: Colors.amber,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            5)),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                             ],
                           ),
                         ),

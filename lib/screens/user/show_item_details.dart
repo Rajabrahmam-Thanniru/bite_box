@@ -25,15 +25,18 @@ class Item_details extends StatefulWidget {
 
 class _Item_detailsState extends State<Item_details> {
   List _wishlist_item = [];
+  List _reviews = [];
+  bool _showAllReviews = false;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Push_to_wishlist pw = Push_to_wishlist();
   SearchSomething searchSomething = SearchSomething();
   Push_to_cart pc = Push_to_cart();
+
   @override
   void initState() {
     super.initState();
-
     wishList_names();
+    GetReviews();
   }
 
   Future<void> wishList_names() async {
@@ -56,7 +59,24 @@ class _Item_detailsState extends State<Item_details> {
     } catch (e) {
       print('Error fetching wishlist data: $e');
     }
-    print(_wishlist_item.length);
+  }
+
+  Future<void> GetReviews() async {
+    _reviews.clear();
+
+    try {
+      QuerySnapshot<Map<String, dynamic>> data = await _firestore
+          .collection('Menu')
+          .doc(widget.item['Item Name'])
+          .collection('reviews')
+          .orderBy('timestamp', descending: true)
+          .get();
+      setState(() {
+        _reviews = data.docs;
+      });
+    } catch (e) {
+      print('Error fetching reviews data: $e');
+    }
   }
 
   @override
@@ -284,12 +304,108 @@ class _Item_detailsState extends State<Item_details> {
                       overflow: TextOverflow.visible,
                     ),
                   ),
+                  Divider(
+                    color: Colors.black12,
+                    thickness: 0.5,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: 10),
+                    child: Text(
+                      'Reviews',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  _buildReviewSection(),
+                  SizedBox(
+                    height: 10,
+                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildReviewSection() {
+    if (_reviews.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.only(top: 10, right: 15, bottom: 10),
+        child: Text(
+          'No reviews yet.',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.black45,
+          ),
+        ),
+      );
+    }
+
+    int reviewCount = _showAllReviews ? _reviews.length : 2;
+    List<Widget> reviewWidgets = _reviews.take(reviewCount).map((reviewDoc) {
+      var review = reviewDoc.data();
+      return Padding(
+        padding: EdgeInsets.only(top: 10, right: 15, bottom: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              review['User Email'] ?? 'Anonymous',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 5),
+            Text(
+              review['review'] ?? '',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black45,
+              ),
+            ),
+            Divider(
+              color: Colors.black12,
+              thickness: 0.5,
+            ),
+          ],
+        ),
+      );
+    }).toList();
+
+    return Column(
+      children: [
+        ...reviewWidgets,
+        if (_reviews.length > 2)
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                _showAllReviews = !_showAllReviews;
+              });
+            },
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.only(
+                  top: 5,
+                  right: 10,
+                ),
+                child: Text(
+                  _showAllReviews ? 'View Less' : 'View More',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

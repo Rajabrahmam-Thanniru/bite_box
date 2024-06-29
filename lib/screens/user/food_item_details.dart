@@ -37,7 +37,7 @@ class _DetailsState extends State<Details> {
   @override
   void initState() {
     super.initState();
-    val = 0; // Initialize val
+    val = 0;
     getMenu();
   }
 
