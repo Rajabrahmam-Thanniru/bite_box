@@ -1,57 +1,45 @@
 import 'dart:io';
+import 'package:bite_box/screens/loginpage.dart';
 import 'package:bite_box/utils/Hexcode.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
-class EditFood extends StatefulWidget {
-  final DocumentSnapshot snapshot;
-  const EditFood({super.key, required this.snapshot});
+class ProfileDetails extends StatefulWidget {
+  final String email;
+  ProfileDetails({super.key, required this.email});
 
   @override
-  State<EditFood> createState() => _EditFoodState();
+  State<ProfileDetails> createState() => _ProfileDetailsState();
 }
 
-class _EditFoodState extends State<EditFood> {
+class _ProfileDetailsState extends State<ProfileDetails> {
   List<XFile>? images = [];
   List<String> items = [];
   int flag = 0;
   String? itemtype;
   String? useremail = FirebaseAuth.instance.currentUser?.email;
-  TextEditingController search = TextEditingController();
-  TextEditingController _itemname = TextEditingController();
-  TextEditingController _price = TextEditingController();
-  TextEditingController _consistsof = TextEditingController();
-  TextEditingController _itemdescription = TextEditingController();
-  String dropdownValue = 'Veg';
+  TextEditingController _fullname = TextEditingController();
+  TextEditingController _phonenumber = TextEditingController();
+  String dropdownValue = "Male";
 
   late List<String> downloadurls;
   bool _isUploading = false;
   @override
   void initState() {
     super.initState();
-    dropdownValue = widget.snapshot['Type'];
-    itemtype = widget.snapshot['Item Category'];
-    _itemname.text = widget.snapshot['Item Name'];
-    _price.text = widget.snapshot['Price'];
-    _consistsof.text = widget.snapshot['Consists Of'];
-    _itemdescription.text = widget.snapshot['Item Description'];
-
     create_list();
   }
 
   @override
   void dispose() {
-    search.dispose();
-    _itemname.dispose();
-    _price.dispose();
-    _consistsof.dispose();
-    _itemdescription.dispose();
-
+    _fullname.dispose();
+    _phonenumber.dispose();
     super.dispose();
   }
 
@@ -86,7 +74,8 @@ class _EditFoodState extends State<EditFood> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => LoginPage()));
               },
               child: const Text('Continue'),
             ),
@@ -163,7 +152,7 @@ class _EditFoodState extends State<EditFood> {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: -5,
-        title: Text("Edit Food Details",
+        title: Text("Profile Details",
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontFamily: 'Roboto',
@@ -185,20 +174,18 @@ class _EditFoodState extends State<EditFood> {
               try {
                 downloadurls = await uploadImages(images!);
                 await FirebaseFirestore.instance
-                    .collection('Menu')
-                    .doc(_itemname.text)
+                    .collection('Users')
+                    .doc(widget.email)
+                    .collection('userinfo')
+                    .doc('userinfo')
                     .update({
-                  'Item Name': _itemname.text,
-                  'Item Category': itemtype,
-                  'Price': _price.text,
-                  'Consists Of': _consistsof.text,
-                  'Item Description': _itemdescription.text,
-                  'Type': dropdownValue,
-                  'Images': downloadurls,
-                  'User Email': useremail,
+                  'Profile Image': downloadurls,
+                  'Full Name': _fullname.text,
+                  'Phone Number': _phonenumber.text,
+                  'Gender': dropdownValue,
                 }).then((value) {
                   _showDocumentIdPopup2(
-                      "Item Added Successfully", 'Upload Successful');
+                      "Details Added Successfully", 'Upload Successful');
                 });
               } catch (e) {
                 print(e); // Handle or log error
@@ -268,7 +255,7 @@ class _EditFoodState extends State<EditFood> {
                                         Positioned(
                                             top: width * 0.02,
                                             left: width * 0.03,
-                                            child: Text("Food Photo",
+                                            child: Text("Profile Photo",
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontFamily: 'Roboto',
@@ -291,62 +278,30 @@ class _EditFoodState extends State<EditFood> {
                                       ],
                                     ),
                                   )),
-                                  flag == 0
-                                      ? Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.only(
-                                                top: width * 0.1),
-                                            child: Container(
-                                              width: width,
-                                              child: Image.network(
-                                                widget.snapshot['Images'][0],
-                                                loadingBuilder: (context, child,
-                                                    loadingProgress) {
-                                                  if (loadingProgress == null)
-                                                    return child;
-                                                  return Center(
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                      value: loadingProgress
-                                                                  .expectedTotalBytes !=
-                                                              null
-                                                          ? loadingProgress
-                                                                  .cumulativeBytesLoaded /
-                                                              loadingProgress
-                                                                  .expectedTotalBytes!
-                                                          : null,
-                                                    ),
-                                                  );
-                                                },
-                                                alignment: Alignment.center,
-                                              ),
+                                  Positioned(
+                                      top: width * 0.35,
+                                      left: width * 0.33,
+                                      child: Column(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              pickImages();
+                                            },
+                                            child: Image.asset(
+                                              'assets/images/Addphoto2.png',
+                                              width: width * 0.13,
+                                              height: width * 0.13,
                                             ),
                                           ),
-                                        )
-                                      : Positioned(
-                                          top: width * 0.35,
-                                          left: width * 0.33,
-                                          child: Column(
-                                            children: [
-                                              GestureDetector(
-                                                onTap: () {
-                                                  pickImages();
-                                                },
-                                                child: Image.asset(
-                                                  'assets/images/Addphoto2.png',
-                                                  width: width * 0.13,
-                                                  height: width * 0.13,
-                                                ),
-                                              ),
-                                              Text(
-                                                "Click to Add Photo",
-                                                style: TextStyle(
-                                                  fontSize: width * 0.03,
-                                                  color: Colors.black38,
-                                                ),
-                                              ),
-                                            ],
-                                          )),
+                                          Text(
+                                            "Click to Add Photo",
+                                            style: TextStyle(
+                                              fontSize: width * 0.03,
+                                              color: Colors.black38,
+                                            ),
+                                          ),
+                                        ],
+                                      )),
                                   Positioned(
                                       bottom: width * 0.02,
                                       left: width * 0.02,
@@ -387,7 +342,7 @@ class _EditFoodState extends State<EditFood> {
                                         Positioned(
                                             top: width * 0.02,
                                             left: width * 0.03,
-                                            child: Text("Food Photo",
+                                            child: Text("Profile Photo",
                                                 style: TextStyle(
                                                     color: Colors.white,
                                                     fontFamily: 'Roboto',
@@ -443,7 +398,7 @@ class _EditFoodState extends State<EditFood> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Item name",
+                        "Full name",
                         style: TextStyle(
                           fontSize: width * 0.045,
                           fontWeight: FontWeight.w900,
@@ -462,10 +417,9 @@ class _EditFoodState extends State<EditFood> {
                         padding: EdgeInsets.only(
                             right: width * 0.04, left: width * 0.04),
                         child: TextField(
-                          controller: _itemname,
-                          enabled: false,
+                          controller: _fullname,
                           decoration: InputDecoration(
-                            hintText: 'Enter the Item Name',
+                            hintText: 'Enter Your Full Name',
                             hintStyle: TextStyle(fontSize: 14.0),
                             contentPadding: const EdgeInsets.only(
                               left: 5,
@@ -483,114 +437,7 @@ class _EditFoodState extends State<EditFood> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Item Category",
-                        style: TextStyle(
-                          fontSize: width * 0.045,
-                          fontWeight: FontWeight.w900,
-                          fontFamily: 'Roboto',
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: width * 0.03,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton2<String>(
-                          isExpanded: true,
-                          hint: Text(
-                            'Select Category',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).hintColor,
-                            ),
-                          ),
-                          items: items
-                              .map((item) => DropdownMenuItem(
-                                    value: item,
-                                    child: Text(
-                                      item,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ))
-                              .toList(),
-                          value: itemtype,
-                          onChanged: (value) {
-                            setState(() {
-                              itemtype = value;
-                            });
-                          },
-                          buttonStyleData: const ButtonStyleData(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            height: 40,
-                            width: 200,
-                          ),
-                          dropdownStyleData: const DropdownStyleData(
-                            maxHeight: 200,
-                          ),
-                          menuItemStyleData: const MenuItemStyleData(
-                            height: 40,
-                          ),
-                          dropdownSearchData: DropdownSearchData(
-                            searchController: search,
-                            searchInnerWidgetHeight: 50,
-                            searchInnerWidget: Container(
-                              height: 50,
-                              padding: const EdgeInsets.only(
-                                top: 8,
-                                bottom: 4,
-                                right: 8,
-                                left: 8,
-                              ),
-                              child: TextFormField(
-                                expands: true,
-                                maxLines: null,
-                                controller: search,
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 8,
-                                  ),
-                                  hintText: 'Search for an item...',
-                                  hintStyle: const TextStyle(fontSize: 12),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            searchMatchFn: (item, searchValue) {
-                              return item.value
-                                  .toString()
-                                  .toLowerCase()
-                                  .contains(searchValue.toLowerCase());
-                            },
-                          ),
-                          //This to clear the search value when you close the menu
-                          onMenuStateChange: (isOpen) {
-                            if (!isOpen) {
-                              search.clear();
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: width * 0.06,
-                      top: width * 0.024,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Price",
+                        "Phone Number",
                         style: TextStyle(
                           fontSize: width * 0.045,
                           fontWeight: FontWeight.w900,
@@ -609,9 +456,9 @@ class _EditFoodState extends State<EditFood> {
                         padding: EdgeInsets.only(
                             right: width * 0.04, left: width * 0.04),
                         child: TextField(
-                          controller: _price,
+                          controller: _phonenumber,
                           decoration: InputDecoration(
-                            hintText: 'Enter The Price Of The Item',
+                            hintText: 'Enter Your Phone Number',
                             hintStyle: TextStyle(fontSize: 14.0),
                             contentPadding: const EdgeInsets.only(
                               left: 5,
@@ -629,7 +476,7 @@ class _EditFoodState extends State<EditFood> {
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        "Type",
+                        "Gender",
                         style: TextStyle(
                           fontSize: width * 0.045,
                           fontWeight: FontWeight.w900,
@@ -656,113 +503,13 @@ class _EditFoodState extends State<EditFood> {
                             dropdownValue = newValue!;
                           });
                         },
-                        items: <String>['Veg', 'Non-Veg']
+                        items: <String>['Male', 'Female']
                             .map<DropdownMenuItem<String>>((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
                             child: Text(value),
                           );
                         }).toList(),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: width * 0.06,
-                      top: width * 0.024,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Consists of",
-                        style: TextStyle(
-                          fontSize: width * 0.045,
-                          fontWeight: FontWeight.w900,
-                          fontFamily: 'Roboto',
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: width * 0.02,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          right: width * 0.04,
-                          left: width * 0.04,
-                        ),
-                        child: Container(
-                          width: width,
-                          height: 100,
-                          child: TextFormField(
-                            controller: _consistsof,
-                            decoration: InputDecoration(
-                              hintText: 'Enter What This Items Consists Of',
-                              hintStyle: TextStyle(fontSize: 14.0),
-                              contentPadding: const EdgeInsets.only(
-                                left: 5,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            maxLines: null,
-                            expands: true,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: width * 0.06,
-                      top: width * 0.024,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Item Description",
-                        style: TextStyle(
-                          fontSize: width * 0.045,
-                          fontWeight: FontWeight.w900,
-                          fontFamily: 'Roboto',
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: width * 0.02,
-                    ),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                            right: width * 0.04,
-                            left: width * 0.04,
-                            bottom: width * 0.02),
-                        child: Container(
-                          width: width,
-                          height: 100,
-                          child: TextFormField(
-                            controller: _itemdescription,
-                            decoration: InputDecoration(
-                              hintText: 'Enter The Item Description',
-                              hintStyle: TextStyle(fontSize: 14.0),
-                              contentPadding: const EdgeInsets.only(
-                                left: 5,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                            ),
-                            maxLines: null,
-                            expands: true,
-                          ),
-                        ),
                       ),
                     ),
                   ),

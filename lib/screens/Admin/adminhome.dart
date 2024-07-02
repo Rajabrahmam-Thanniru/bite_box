@@ -11,6 +11,7 @@ import 'package:bite_box/utils/cart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -41,6 +42,7 @@ class _AdminHomeState extends State<AdminHome> {
   @override
   void dispose() {
     _pageController.dispose();
+    DefaultCacheManager().emptyCache();
     super.dispose();
   }
 

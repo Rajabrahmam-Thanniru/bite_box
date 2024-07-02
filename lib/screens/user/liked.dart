@@ -289,8 +289,10 @@ class _LikedState extends State<Liked> {
                                         ),
                                         Padding(
                                             padding: EdgeInsets.only(left: 8),
-                                            child: Text(
-                                                "(${item['Total Rating'] / item['Rating Count']})"))
+                                            child: Text(item['Total Rating'] ==
+                                                    0
+                                                ? " 0 "
+                                                : "(${(item['Total Rating'] / item['Rating Count']).toStringAsFixed(1)})"))
                                       ],
                                     ),
                                   ),

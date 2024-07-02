@@ -1,5 +1,6 @@
 import 'package:bite_box/provider/google_sign_in.dart';
 import 'package:bite_box/screens/loginpage.dart';
+import 'package:bite_box/screens/user/Profiledetails.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -143,7 +144,8 @@ class _SignUpState extends State<SignUp> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const LoginPage()));
+                                builder: (context) => ProfileDetails(
+                                    email: emailcontroller.text)));
                       } on FirebaseAuthException catch (e) {
                         setState(() {
                           isLoading = false;

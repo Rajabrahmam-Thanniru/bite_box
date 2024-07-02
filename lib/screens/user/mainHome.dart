@@ -122,8 +122,7 @@ class _MainUserHomeState extends State<MainUserHome> {
                 imageUrl: imageUrl,
                 key: UniqueKey(),
                 fit: BoxFit.contain,
-                placeholder: (context, url) =>
-                    Center(child: const CircularProgressIndicator()),
+                placeholder: (context, url) => Center(child: Container()),
                 errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
             ),
@@ -362,9 +361,7 @@ class _MainUserHomeState extends State<MainUserHome> {
           child: Column(
             children: [
               GestureDetector(
-                onTap: () {
-                  handleSignOut(context);
-                },
+                onTap: () {},
                 child: Container(
                   width: width,
                   height: 220,

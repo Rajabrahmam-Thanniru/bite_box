@@ -65,6 +65,7 @@ class Place_order {
             'Address': item['Address'],
             'Email': item['User Email'],
             'Rating Given': false,
+            'Paid via': "Online",
             'Stars': 0,
           });
           final fcm = await _firestore
@@ -89,6 +90,7 @@ class Place_order {
             'Item Description': item['Item Description'],
             'Type': item['Type'],
             'Address': item['Address'],
+            'Paid via': "Online",
             'Email': user.email
           });
         }

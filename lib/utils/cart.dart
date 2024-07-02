@@ -1,11 +1,13 @@
 import 'package:bite_box/screens/user/user_home.dart';
 import 'package:bite_box/utils/Hexcode.dart';
 import 'package:bite_box/utils/place_order.dart';
+import 'package:bite_box/utils/place_order_via_cash.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Cart extends StatefulWidget {
@@ -27,6 +29,7 @@ class _CartState extends State<Cart> {
   String selectedAddress = "";
   late int s = 0;
   bool loading = false;
+  String paymentMethod = 'Pay via Online';
 
   @override
   void initState() {
@@ -74,6 +77,7 @@ class _CartState extends State<Cart> {
   @override
   void dispose() {
     note.dispose();
+    DefaultCacheManager().emptyCache();
     super.dispose();
   }
 
@@ -106,9 +110,13 @@ class _CartState extends State<Cart> {
           'Consists Of': item['Consists Of'],
         });
       }
-
-      Place_order placeOrder = Place_order();
-      await placeOrder.PlaceOrder(context, orderData);
+      if (paymentMethod == 'Pay via Online') {
+        Place_order placeOrder = Place_order();
+        await placeOrder.PlaceOrder(context, orderData);
+      } else {
+        Place_order_Via_Cash placeOrder = Place_order_Via_Cash();
+        await placeOrder.PlaceOrder(context, orderData);
+      }
 
       await _clearCart();
       setState(() {
@@ -194,6 +202,24 @@ class _CartState extends State<Cart> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10.0),
+                        child: DropdownButton<String>(
+                          value: paymentMethod,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              paymentMethod = newValue!;
+                            });
+                          },
+                          items: <String>['Pay via Online', 'Pay via Cash']
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                        ),
+                      ),
                       Spacer(),
                       Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10),

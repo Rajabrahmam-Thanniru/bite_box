@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class MainAdminHome extends StatefulWidget {
   const MainAdminHome({super.key});
@@ -30,6 +31,12 @@ class _MainAdminHomeState extends State<MainAdminHome> {
     } catch (e) {
       print('Error fetching orders data: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    DefaultCacheManager().emptyCache();
   }
 
   @override

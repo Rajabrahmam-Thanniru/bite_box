@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class AdminOrderRequests extends StatefulWidget {
   const AdminOrderRequests({super.key});
@@ -21,6 +22,12 @@ class _AdminOrderRequestsState extends State<AdminOrderRequests> {
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    DefaultCacheManager().emptyCache();
   }
 
   Future<void> getorderrequests() async {
@@ -298,6 +305,12 @@ class _AdminOrderRequestsState extends State<AdminOrderRequests> {
                                 ),
                                 Row(
                                   children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          left: 15.0, top: 8),
+                                      child:
+                                          Text("Paid via ${item['Paid via']}"),
+                                    ),
                                     Spacer(),
                                     Padding(
                                       padding: const EdgeInsets.only(
@@ -396,6 +409,8 @@ class _AdminOrderRequestsState extends State<AdminOrderRequests> {
         'Item Description': item['Item Description'],
         'Type': item['Type'],
         'Address': item['Address'],
+        'Paid Via': item['Paid via'],
+        'Phone': item['Phone'],
         'Email': item['Email']
       });
       await _firestore

@@ -3,7 +3,9 @@ import 'package:bite_box/screens/user/review.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:intl/intl.dart';
 
 class Order_screen extends StatefulWidget {
@@ -21,6 +23,12 @@ class _OrderState extends State<Order_screen> {
   void initState() {
     super.initState();
     getOrders();
+  }
+
+  @override
+  void dispose() {
+    DefaultCacheManager().emptyCache();
+    super.dispose();
   }
 
   Future<void> getOrders() async {
@@ -79,7 +87,6 @@ class _OrderState extends State<Order_screen> {
                     margin:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     width: width * 0.9,
-                    height: 260,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       boxShadow: [
@@ -252,21 +259,76 @@ class _OrderState extends State<Order_screen> {
                                 ),
                               ),
                               Spacer(),
-                              ElevatedButton(
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    isScrollControlled: true,
-                                    builder: (context) {
-                                      return ReviewItem(
-                                        item: item['Item Name'] ?? 'No Name',
-                                        orderId: item['OrderId'],
-                                      );
-                                    },
-                                  );
-                                },
-                                child: Text('Write Review'),
+                              Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Text(
+                                      "₹ ${item['Price'] ?? 'N/A'}",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding:
+                                        EdgeInsets.only(left: 3, right: 10),
+                                    child: FaIcon(
+                                      FontAwesomeIcons.chevronRight,
+                                      size: 10,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
                               ),
+                            ],
+                          ),
+                        ),
+                        item['Rating Given'] == false
+                            ? Divider(
+                                color: Colors.black12,
+                                thickness: 0.4,
+                              )
+                            : Container(
+                                height: 10,
+                              ),
+                        Padding(
+                          padding: EdgeInsets.only(left: 10, bottom: 10),
+                          child: Row(
+                            children: [
+                              item['Rating Given'] == false
+                                  ? Row(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () async {
+                                            await showModalBottomSheet(
+                                              context: context,
+                                              backgroundColor: Colors.white,
+                                              isScrollControlled: true,
+                                              builder: (context) {
+                                                return ReviewItem(
+                                                  item: item,
+                                                  orderId: item['OrderId'],
+                                                );
+                                              },
+                                            );
+                                            await getOrders();
+                                          },
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              'Rating & Review',
+                                              style: TextStyle(
+                                                  color: Color.fromARGB(
+                                                      255, 62, 159, 255),
+                                                  fontSize: 15),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Container()
                             ],
                           ),
                         ),

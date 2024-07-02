@@ -36,7 +36,7 @@ class Push_to_cart {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(order.length.toString())),
+        SnackBar(content: Text('Added to cart: ' + order[0]['Item Name'])),
       );
     } catch (e) {
       print("Error placing order: $e");

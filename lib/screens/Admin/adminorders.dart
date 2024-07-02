@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:intl/intl.dart';
 
 class AdminOrders extends StatefulWidget {
@@ -28,6 +29,13 @@ class _AdminOrdersState extends State<AdminOrders> {
   void initState() {
     super.initState();
     getOrders();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _searchController.dispose();
+    DefaultCacheManager().emptyCache();
   }
 
   Future<void> getOrders() async {
@@ -155,7 +163,6 @@ class _AdminOrdersState extends State<AdminOrders> {
                             margin: const EdgeInsets.symmetric(
                                 horizontal: 10, vertical: 5),
                             width: width * 0.9,
-                            height: item['Status'] != 'Delivered' ? 270 : 230,
                             decoration: BoxDecoration(
                               color: Colors.white,
                               boxShadow: [
@@ -170,19 +177,27 @@ class _AdminOrdersState extends State<AdminOrders> {
                             ),
                             child: Column(
                               children: [
-                                Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                          right: 8.0, top: 5),
-                                      child: Text(
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      right: 8.0, top: 5, left: 8),
+                                  child: Row(
+                                    children: [
+                                      Text("Paid Via ${item['Paid Via']}",
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 15,
+                                          )),
+                                      Spacer(),
+                                      Text(
                                         "Order Id: ${item['OrderId']}",
                                         style: TextStyle(
                                           color: Colors.black26,
                                           fontSize: 15,
                                         ),
                                       ),
-                                    )),
+                                    ],
+                                  ),
+                                ),
                                 Row(
                                   children: [
                                     Container(
@@ -361,6 +376,32 @@ class _AdminOrdersState extends State<AdminOrders> {
                                             ),
                                           ),
                                         ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(left: 10, top: 5),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        item['Address'] ?? 'No Address',
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(right: 8.0),
+                                        child: Text(
+                                          item['Phone'] ?? 'No Type',
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 15,
+                                          ),
+                                        ),
                                       ),
                                     ],
                                   ),

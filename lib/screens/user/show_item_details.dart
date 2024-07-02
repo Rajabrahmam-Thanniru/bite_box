@@ -7,6 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Item_details extends StatefulWidget {
@@ -37,6 +39,12 @@ class _Item_detailsState extends State<Item_details> {
     super.initState();
     wishList_names();
     GetReviews();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    DefaultCacheManager().emptyCache();
   }
 
   Future<void> wishList_names() async {
@@ -82,6 +90,14 @@ class _Item_detailsState extends State<Item_details> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
+
+    String itemName = widget.item['Item Name'] ?? 'Unknown Item';
+    String itemDescription =
+        widget.item['Item Description'] ?? 'No description available.';
+    String itemImage =
+        (widget.item['Images'] != null && widget.item['Images'].isNotEmpty)
+            ? widget.item['Images'][0]
+            : '';
 
     bool isliked = _wishlist_item.contains(
         widget.item['Item Name'].toString().replaceAll(' ', '').toLowerCase());
@@ -189,15 +205,19 @@ class _Item_detailsState extends State<Item_details> {
                     color: Colors.black12,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: CachedNetworkImage(
-                    imageUrl: widget.item['Images'][0],
-                    placeholder: (context, url) => Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                    key: UniqueKey(),
-                    fit: BoxFit.cover,
-                  ),
+                  child: itemImage.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: itemImage,
+                          placeholder: (context, url) => Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                          key: UniqueKey(),
+                          fit: BoxFit.cover,
+                        )
+                      : Icon(Icons
+                          .error), // Provide a default icon when itemImage is empty or null
                 ),
               ),
             ),
@@ -209,7 +229,7 @@ class _Item_detailsState extends State<Item_details> {
                   Row(
                     children: [
                       Text(
-                        widget.item['Item Name'],
+                        itemName,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 21,
@@ -235,7 +255,7 @@ class _Item_detailsState extends State<Item_details> {
                         size: 5,
                       ),
                       Text(
-                        " Includes " + widget.item['Consists Of'],
+                        " Includes " + (widget.item['Consists Of'] ?? ''),
                         style: TextStyle(
                           color: Colors.grey,
                         ),
@@ -256,7 +276,9 @@ class _Item_detailsState extends State<Item_details> {
                           color: Colors.amber,
                         ),
                         Text(
-                          "${widget.item['Total Rating'] / widget.item['Rating Count']} (${widget.item['Rating Count']})",
+                          widget.item['Total Rating'] == 0
+                              ? " 0 (0)"
+                              : "${(widget.item['Total Rating'] / widget.item['Rating Count']).toStringAsFixed(1)} (${widget.item['Rating Count']})",
                           style: TextStyle(
                             fontSize: 16,
                           ),
@@ -294,7 +316,7 @@ class _Item_detailsState extends State<Item_details> {
                   Padding(
                     padding: EdgeInsets.only(top: 10, right: 15, bottom: 10),
                     child: Text(
-                      widget.item['Item Description'],
+                      itemDescription,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.black45,
@@ -319,9 +341,6 @@ class _Item_detailsState extends State<Item_details> {
                     ),
                   ),
                   _buildReviewSection(),
-                  SizedBox(
-                    height: 10,
-                  ),
                 ],
               ),
             ),
@@ -347,30 +366,83 @@ class _Item_detailsState extends State<Item_details> {
 
     int reviewCount = _showAllReviews ? _reviews.length : 2;
     List<Widget> reviewWidgets = _reviews.take(reviewCount).map((reviewDoc) {
+      final width = MediaQuery.of(context).size.width;
       var review = reviewDoc.data();
+
+      if (review == null) {
+        return SizedBox.shrink();
+      }
+
+      String profileImage = review['Profile Image'] ??
+          'https://imgs.search.brave.com/Tso5b-lOgqvrXcfgrknvzs0lqGmW_rXIwHjY3nkCBFI/rs:fit:500:0:0:0/g:ce/aHR0cHM6Ly9mcmVl/c3ZnLm9yZy9pbWcv/YWJzdHJhY3QtdXNl/ci1mbGF0LTQucG5n';
+      String fullName = review['Full Name'] ?? 'Anonymous';
+      double stars = (review['Stars'] ?? 0).toDouble();
+      String reviewText = review['review'] ?? '';
+
       return Padding(
         padding: EdgeInsets.only(top: 10, right: 15, bottom: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text(
-              review['User Email'] ?? 'Anonymous',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+            Container(
+              width: 50,
+              height: 50,
+              margin: const EdgeInsets.only(right: 10),
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(50),
               ),
+              child: profileImage.isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: profileImage,
+                      placeholder: (context, url) => Center(
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                      key: UniqueKey(),
+                      fit: BoxFit.cover,
+                    )
+                  : Icon(Icons
+                      .error), // Provide a default icon when profileImage is empty or null
             ),
-            SizedBox(height: 5),
-            Text(
-              review['review'] ?? '',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black45,
-              ),
-            ),
-            Divider(
-              color: Colors.black12,
-              thickness: 0.5,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  fullName,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 5),
+                RatingBar(
+                  initialRating: stars,
+                  direction: Axis.horizontal,
+                  allowHalfRating: true,
+                  itemCount: 5,
+                  ratingWidget: RatingWidget(
+                    full: Icon(Icons.star, color: Colors.amber),
+                    half: Icon(Icons.star_half_outlined, color: Colors.amber),
+                    empty: Icon(Icons.star_border_outlined, color: Colors.grey),
+                  ),
+                  itemSize: 20,
+                  ignoreGestures: true,
+                  onRatingUpdate: (rating) {
+                    setState(() {});
+                  },
+                ),
+                Container(
+                  width: width * 0.7,
+                  child: Text(
+                    reviewText,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.black45,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
